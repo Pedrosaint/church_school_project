@@ -15,7 +15,7 @@ const Footer = () => {
         {/* LOGO + CONTACT */}
         <div>
           <figure className="font-bold text-xl">
-            <img src="/src/assets/icons/WATHS LOGO 2.svg" alt="Church logo" />
+            <img src="/logo.svg" alt="Church logo" />
           </figure>
           <p className="text-sm mt-3 leading-relaxed text-gray-400 font-inter">
             Equipping God’s people for faithful service in His kingdom since

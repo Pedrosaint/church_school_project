@@ -39,7 +39,7 @@ const Header = () => {
         <figure
           onClick={() => navigate("/")}
           className="text-xl font-semibold cursor-pointer">
-          <img src="/src/assets/icons/WATHS LOGO 2.svg" alt="Church Logo" />
+          <img src="/logo.svg" alt="Church Logo" />
         </figure>
 
         {/* MOBILE TOGGLE */}

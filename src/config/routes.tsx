@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 import MainLayout from "../general/layout/main_layout";
-import HomeView from "../landing_page/modules/home/view/home.view";
+// import HomeView from "../landing_page/modules/home/view/home.view";
 import AboutView from "../landing_page/modules/about/view/about.view";
 import AcademicView from "../landing_page/modules/academic/view/academic.view";
 import AdmissionView from "../landing_page/modules/admission/view/admission.view";
@@ -94,7 +94,7 @@ export default function appRouter(): RouteObject[] {
       children: [
         {
           index: true,
-          element: <HomeView />,
+          element: <AdmissionView />,
         },
         {
           path: "/about",

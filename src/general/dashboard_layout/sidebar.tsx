@@ -4,7 +4,7 @@ import { LogOut, X } from "lucide-react";
 import { adminMenu, userMenu } from "../../lib/sidebar_links";
 import LogoutModal from "./modal/logout.modal";
 import { motion, AnimatePresence } from "framer-motion";
-import Logo from "../../assets/icons/WATHS LOGO 2.svg";
+
 
 type MenuItem = {
   label: string;
@@ -38,7 +38,7 @@ export default function Sidebar({
       <div className="mb-8 relative">
         <div className="w-30 h-30 bg-white rounded-full absolute -top-10 right-39 flex items-center justify-center shadow-md">
           <span className="text-slate-900 text-lg font-medium">
-            <img src={Logo} alt="WAGGOM Logo" />
+            <img src="/logo.svg" alt="WAGGOM Logo" />
           </span>
         </div>
       </div>
