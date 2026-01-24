@@ -20,7 +20,7 @@ const AcademicSearch = () => {
   const [selectedDept, setSelectedDept] = useState("All Departments");
 
   return (
-    <div className="bg-white py-8 px-4 mt-28 md:mt-39">
+    <div className="bg-white py-8 px-4 mt-32 md:mt-39">
       <div className="container mx-auto max-w-4xl">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center relative">
