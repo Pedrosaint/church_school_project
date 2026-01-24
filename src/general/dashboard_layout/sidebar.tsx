@@ -51,10 +51,9 @@ export default function Sidebar({
             to={item.path}
             onClick={() => setMobileOpen && setMobileOpen(false)} // Close on select
             className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? "bg-white text-slate-900 font-semibold shadow-sm"
-                  : "text-white hover:bg-slate-600"
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                ? "bg-white text-slate-900 font-semibold shadow-sm"
+                : "text-white hover:bg-slate-600"
               }`
             }
           >
@@ -62,9 +61,8 @@ export default function Sidebar({
               <>
                 {item.icon && (
                   <item.icon
-                    className={`w-5 h-5 ${
-                      isActive ? "text-[#D4A34A]" : "text-white"
-                    }`}
+                    className={`w-5 h-5 ${isActive ? "text-[#D4A34A]" : "text-white"
+                      }`}
                   />
                 )}
                 <span className="text-sm">{item.label}</span>
@@ -75,7 +73,7 @@ export default function Sidebar({
       </nav>
 
       {/* Logout Button */}
-      <div className="mt-auto pt-4 md:static sticky bottom-0 bg-[#0B2545]">
+      <div className="mt-auto pt-4 md:static sticky bottom-40 bg-[#0B2545]">
         <button
           onClick={() => setLogoutModal(true)}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#0B2545] bg-white hover:bg-gray-100 transition shadow-lg"
