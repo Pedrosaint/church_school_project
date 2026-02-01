@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface GuardianInfoProps {
   goToNext: () => void;
@@ -7,19 +8,37 @@ interface GuardianInfoProps {
 }
 
 const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
+  const { updateFormData, getFormData } = useAdmissionContext();
   const [formData, setFormData] = useState({
-    parentAddress: "",
-    emergencyNameAddress: "",
+    parentGuardian: "",
+    emergencyContact: "",
     emergencyPhone: "",
-    nextOfKinNameAddress: "",
+    nextOfKin: "",
     nextOfKinPhone: "",
   });
 
+  useEffect(() => {
+    const data = getFormData();
+    if (data.guardianInfo) {
+      setFormData(data.guardianInfo);
+    }
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNext = () => {
+    updateFormData("guardianInfo", formData);
+    goToNext();
+  };
+
+  const handlePrev = () => {
+    updateFormData("guardianInfo", formData);
+    goToPrev();
   };
 
   return (
@@ -112,7 +131,7 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
         >
           {/* Previous */}
           <button
-            onClick={goToPrev}
+            onClick={handlePrev}
             className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-gray-300
@@ -123,6 +142,7 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
 
           {/* Save */}
           <button
+            onClick={() => updateFormData("guardianInfo", formData)}
             className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -134,7 +154,7 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
 
           {/* Next */}
           <button
-            onClick={goToNext}
+            onClick={handleNext}
             className="w-full sm:w-auto
                bg-[#D4A34A] px-6 py-3
                rounded-xl text-[#0B2545]

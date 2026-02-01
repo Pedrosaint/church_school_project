@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Edit, FileText } from "lucide-react";
 import { useState } from "react";
 import SuccessModal from "../../modal/success.modal";
@@ -7,16 +8,194 @@ import ProgrammeInfoModal from "../../modal/programme_info.modal";
 import ContactDetailsModal from "../../modal/contact_details.modal";
 import GuardianInfoModal from "../../modal/guardian_info.modal";
 import EducationQualificationModal from "../../modal/education_qualification.modal";
+import { useSubmitAdmissionMutation } from "../../api/admission.api";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 const ReviewSubmitApplication = () => {
-   const [showProgrammeInformationModal, setShowProgrammeInformationModal] =
-     useState(false);
+  const [showProgrammeInformationModal, setShowProgrammeInformationModal] =
+    useState(false);
   const [showContactDetailsModal, setShowContactDetailsModal] = useState(false);
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [showGaurdianInfoModal, setShowGaurdianInfoModal] = useState(false);
-  const [showEducationQualificationModal, setShowEducationQualificationModal] = useState(false);
+  const [showEducationQualificationModal, setShowEducationQualificationModal] =
+    useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedAdmission, setSubmittedAdmission] = useState<any | null>(
+    null,
+  );
+
+
+  const [submitAdmission] = useSubmitAdmissionMutation();
+  const { getFormData, resetForm } = useAdmissionContext();
+  const formData = getFormData();
+
+  const buildFormData = (): FormData => {
+    const data = getFormData();
+    const formData = new FormData();
+
+    // Programme Info
+    if (data.programmeInfo) {
+      formData.append(
+        "programmeLevel",
+        data.programmeInfo.programmeLevel || "",
+      );
+      formData.append(
+        "programmeChoice",
+        data.programmeInfo.programmeChoice || "",
+      );
+    }
+
+    // Personal Info
+    if (data.personalInfo) {
+      formData.append("surname", data.personalInfo.surname || "");
+      formData.append("firstname", data.personalInfo.firstName || "");
+      formData.append("otherNames", data.personalInfo.otherNames || "");
+      formData.append("title", data.personalInfo.title || "");
+      formData.append("dateOfBirth", data.personalInfo.dateOfBirth || "");
+      formData.append("placeOfBirth", data.personalInfo.placeOfBirth || "");
+      formData.append("gender", data.personalInfo.gender || "");
+    }
+
+    // Contact Details
+    if (data.contactDetails) {
+      formData.append("email", data.contactDetails.email || "");
+      formData.append("phone", data.contactDetails.phone || "");
+      formData.append(
+        "presentAddress",
+        data.contactDetails.presentAddress || "",
+      );
+      formData.append(
+        "permanentAddress",
+        data.contactDetails.permanentAddress || "",
+      );
+      formData.append("postalAddress", data.contactDetails.postalAddress || "");
+      formData.append("nationality", data.contactDetails.nationality || "");
+      formData.append(
+        "nativeLanguage",
+        data.contactDetails.nativeLanguage || "",
+      );
+      formData.append(
+        "placeDiffNationality",
+        data.contactDetails.placeDiffNationality || false,
+      );
+      formData.append("maritalStatus", data.contactDetails.maritalStatus || "");
+      formData.append("religion", data.contactDetails.religion || "");
+      formData.append("denomination", data.contactDetails.denomination || "");
+    }
+
+    // Guardian Info
+    if (data.guardianInfo) {
+      formData.append("parentGuardian", data.guardianInfo.parentGuardian || "");
+      formData.append(
+        "emergencyContact",
+        data.guardianInfo.emergencyContact || "",
+      );
+      formData.append("emergencyPhone", data.guardianInfo.emergencyPhone || "");
+      formData.append("nextOfKin", data.guardianInfo.nextOfKin || "");
+      formData.append("nextOfKinPhone", data.guardianInfo.nextOfKinPhone || "");
+    }
+
+    // Education
+    if (data.education && data.education.length > 0) {
+      formData.append("education", JSON.stringify(data.education));
+    }
+
+    // Financial & Reference
+    if (data.financialReference) {
+      formData.append("financeInfo", data.financialReference.financeInfo || "");
+      formData.append("healthInfo", data.financialReference.healthInfo || "");
+      formData.append("description", data.financialReference.description || "");
+      formData.append(
+        "academicReferee",
+        data.financialReference.academicReferee || "",
+      );
+      formData.append(
+        "academicProfession",
+        data.financialReference.academicProfession || "",
+      );
+      formData.append(
+        "academicInstitution",
+        data.financialReference.academicInstitution || "",
+      );
+      formData.append(
+        "academicAddress",
+        data.financialReference.academicAddress || "",
+      );
+      formData.append(
+        "academicPhone",
+        data.financialReference.academicPhone || "",
+      );
+      formData.append(
+        "academicEmail",
+        data.financialReference.academicEmail || "",
+      );
+      formData.append(
+        "clergyReferee",
+        data.financialReference.clergyReferee || "",
+      );
+      formData.append(
+        "clergyPosition",
+        data.financialReference.clergyPosition || "",
+      );
+      formData.append(
+        "clergyChurch",
+        data.financialReference.clergyChurch || "",
+      );
+      formData.append(
+        "clergyAddress",
+        data.financialReference.clergyAddress || "",
+      );
+      formData.append("clergyPhone", data.financialReference.clergyPhone || "");
+      formData.append("clergyEmail", data.financialReference.clergyEmail || "");
+      formData.append(
+        "applicantSignature",
+        data.financialReference.applicantSignature || "",
+      );
+      formData.append(
+        "applicantDate",
+        data.financialReference.applicantDate || "",
+      );
+    }
+
+    // Files
+    if (data.programmeInfo?.certificateFiles) {
+      data.programmeInfo.certificateFiles.forEach((file: File) => {
+        formData.append("certificates", file);
+      });
+    }
+
+    if (data.programmeInfo?.passportPhotos) {
+      data.programmeInfo.passportPhotos.forEach((file: File) => {
+        formData.append("passportPhotos", file);
+      });
+    }
+
+    return formData;
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const formData = buildFormData();
+      const res = await submitAdmission(formData).unwrap();
+      // clear saved form data
+      resetForm();
+      setSubmittedAdmission(res.data ?? null);
+      setShowSuccessModal(true);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to submit application",
+      );
+      console.error("Submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="py-8 md:px-4">
@@ -49,25 +228,35 @@ const ReviewSubmitApplication = () => {
           <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <label className="text-xs text-gray-500">Programme Level</label>
-              <p className="font-medium text-gray-900">Certificate</p>
+              <p className="font-medium text-gray-900">
+                {formData.programmeInfo?.programmeLevel || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">
                 Programme of Choice
               </label>
-              <p className="font-medium text-gray-900">Theology</p>
+              <p className="font-medium text-gray-900">
+                {formData.programmeInfo?.programmeChoice || "N/A"}
+              </p>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FileText className="w-4 h-4" />
-              Result_Slip.jpg
-            </div>
+            {formData.programmeInfo?.certificateFiles &&
+              formData.programmeInfo.certificateFiles.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FileText className="w-4 h-4" />
+                  {formData.programmeInfo.certificateFiles[0].name}
+                </div>
+              )}
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FileText className="w-4 h-4" />
-              Transcript.pdf
-            </div>
+            {formData.programmeInfo?.passportPhotos &&
+              formData.programmeInfo.passportPhotos.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FileText className="w-4 h-4" />
+                  {formData.programmeInfo.passportPhotos[0].name}
+                </div>
+              )}
           </div>
         </div>
 
@@ -88,37 +277,51 @@ const ReviewSubmitApplication = () => {
           <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <label className="text-xs text-gray-500">First Name</label>
-              <p className="font-medium">Nkechi</p>
+              <p className="font-medium">
+                {formData.personalInfo?.firstName || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Surname</label>
-              <p className="font-medium">Chibuzor</p>
+              <p className="font-medium">
+                {formData.personalInfo?.surname || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Other Names</label>
-              <p className="font-medium">Blessing</p>
+              <p className="font-medium">
+                {formData.personalInfo?.otherNames || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Title</label>
-              <p className="font-medium">Mr</p>
+              <p className="font-medium">
+                {formData.personalInfo?.title || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Place of Birth</label>
-              <p className="font-medium">Anambra</p>
+              <p className="font-medium">
+                {formData.personalInfo?.placeOfBirth || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Date of Birth</label>
-              <p className="font-medium">4-03-2025</p>
+              <p className="font-medium">
+                {formData.personalInfo?.dateOfBirth || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Gender</label>
-              <p className="font-medium">Male</p>
+              <p className="font-medium">
+                {formData.personalInfo?.gender || "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -142,54 +345,74 @@ const ReviewSubmitApplication = () => {
               <label className="text-xs text-gray-500">
                 Present Residential Address
               </label>
-              <p className="font-medium">No 20 Joshua Williams Abia</p>
+              <p className="font-medium">
+                {formData.contactDetails?.presentAddress || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Phone Number</label>
-              <p className="font-medium">+234 904 452 3113</p>
+              <p className="font-medium">
+                {formData.contactDetails?.phone || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Email Address</label>
-              <p className="font-medium">Blessing43@gmail.com</p>
+              <p className="font-medium">
+                {formData.contactDetails?.email || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">
                 Permanent Home Address
               </label>
-              <p className="font-medium">No 20 Joshua Williams Abia</p>
+              <p className="font-medium">
+                {formData.contactDetails?.permanentAddress || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Postal Address</label>
-              <p className="font-medium">10011</p>
+              <p className="font-medium">
+                {formData.contactDetails?.postalAddress || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Nationality</label>
-              <p className="font-medium">Nigeria</p>
+              <p className="font-medium">
+                {formData.contactDetails?.nationality || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Native Language</label>
-              <p className="font-medium">Igbo</p>
+              <p className="font-medium">
+                {formData.contactDetails?.nativeLanguage || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Religion</label>
-              <p className="font-medium">Christian</p>
+              <p className="font-medium">
+                {formData.contactDetails?.religion || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Marital Status</label>
-              <p className="font-medium">Single</p>
+              <p className="font-medium">
+                {formData.contactDetails?.maritalStatus || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Denomination</label>
-              <p className="font-medium">RCCG</p>
+              <p className="font-medium">
+                {formData.contactDetails?.denomination || "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -214,9 +437,8 @@ const ReviewSubmitApplication = () => {
               Name & Address of Parent / Guardian
             </p>
             <p className="text-sm text-gray-900 font-medium">
-              Mr Kingsley Obinna.
+              {formData.guardianInfo?.parentGuardian || "N/A"}
             </p>
-            <p className="text-sm text-gray-600">No 20 francis Uti street</p>
           </div>
 
           {/* Emergency Contact */}
@@ -226,18 +448,17 @@ const ReviewSubmitApplication = () => {
 
           <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-gray-500 mb-1">
-                Name & Address of Parent / Guardian
-              </p>
+              <p className="text-xs text-gray-500 mb-1">Name & Contact</p>
               <p className="text-sm font-medium text-gray-900">
-                Mr Kingsley Obinna.
+                {formData.guardianInfo?.emergencyContact || "N/A"}
               </p>
-              <p className="text-sm text-gray-600">No 20 francis Uti street</p>
             </div>
 
             <div>
               <p className="text-xs text-gray-500 mb-1">Phone Number</p>
-              <p className="text-sm font-medium text-gray-900">On Campus</p>
+              <p className="text-sm font-medium text-gray-900">
+                {formData.guardianInfo?.emergencyPhone || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -248,19 +469,16 @@ const ReviewSubmitApplication = () => {
 
           <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-gray-500 mb-1">
-                Name & Address of Parent / Guardian
-              </p>
+              <p className="text-xs text-gray-500 mb-1">Name</p>
               <p className="text-sm font-medium text-gray-900">
-                Mr Kingsley Obinna.
+                {formData.guardianInfo?.nextOfKin || "N/A"}
               </p>
-              <p className="text-sm text-gray-600">No 20 francis Uti street</p>
             </div>
 
             <div>
               <p className="text-xs text-gray-500 mb-1">Phone Number</p>
               <p className="text-sm font-medium text-gray-900">
-                +234 9044523113
+                {formData.guardianInfo?.nextOfKinPhone || "N/A"}
               </p>
             </div>
           </div>
@@ -283,49 +501,52 @@ const ReviewSubmitApplication = () => {
           </div>
 
           {/* Qualification Details */}
-          <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Institution Name</p>
-              <p className="text-sm font-medium text-gray-900">OAU</p>
-            </div>
+          {formData.education && formData.education.length > 0 ? (
+            formData.education.map((edu: any, idx: number) => (
+              <div key={idx}>
+                <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">
+                      Institution Name
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {edu.institution || "N/A"}
+                    </p>
+                  </div>
 
-            <div>
-              <p className="text-xs text-gray-500 mb-1">From</p>
-              <p className="text-sm font-medium text-gray-900">12-02-2021</p>
-            </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">From</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {edu.from || "N/A"}
+                    </p>
+                  </div>
 
-            <div>
-              <p className="text-xs text-gray-500 mb-1">To</p>
-              <p className="text-sm font-medium text-gray-900">12-02-2024</p>
-            </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">To</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {edu.to || "N/A"}
+                    </p>
+                  </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <FileText className="w-4 h-4 text-gray-400" />
-              <span>Bsc Certificate.jpg</span>
-            </div>
-          </div>
-
-          {/* Professional Certificate */}
-          <div className="bg-gray-200 px-6 py-2 text-sm font-semibold text-gray-800">
-            Professional Certificate
-          </div>
-
-          <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <FileText className="w-4 h-4 text-gray-400" />
-              <span>Bsc Certificate.jpg</span>
-            </div>
-
-            <div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Description</p>
-                <div className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-gray-50">
-                  Bachelor of Science certificate obtained after completing a
-                  four-year undergraduate program in the chosen field of study.
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Qualification</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {edu.qualification || "N/A"}
+                    </p>
+                  </div>
                 </div>
+                {idx < formData.education.length - 1 && (
+                  <div className="border-t border-gray-200" />
+                )}
               </div>
+            ))
+          ) : (
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-500">
+                No education records added
+              </p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* ================= Finance & Referee ================= */}
@@ -350,14 +571,18 @@ const ReviewSubmitApplication = () => {
               <label className="block text-xs text-gray-500 mb-1">
                 How do you intend to finance your studies
               </label>
-              <p className="font-medium text-gray-900">Scholarship</p>
+              <p className="font-medium text-gray-900">
+                {formData.financialReference?.financeInfo || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="block text-xs text-gray-500 mb-1">
                 Do you have any special need / health conditions
               </label>
-              <p className="font-medium text-gray-900">Yes</p>
+              <p className="font-medium text-gray-900">
+                {formData.financialReference?.healthInfo || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -371,32 +596,44 @@ const ReviewSubmitApplication = () => {
           <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
             <div>
               <label className="text-xs text-gray-500">Name</label>
-              <p className="font-medium">Joshua Williams</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicReferee || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Profession</label>
-              <p className="font-medium">Lecturer</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicProfession || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Institution</label>
-              <p className="font-medium">OAU</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicInstitution || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Address</label>
-              <p className="font-medium">No 20 Joshua Williams Osun state</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicAddress || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Phone Number</label>
-              <p className="font-medium">+234 904 452 3113</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicPhone || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Email</label>
-              <p className="font-medium">epraiz85@gmail.com</p>
+              <p className="font-medium">
+                {formData.financialReference?.academicEmail || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -410,32 +647,44 @@ const ReviewSubmitApplication = () => {
           <div className="grid md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
             <div>
               <label className="text-xs text-gray-500">Name</label>
-              <p className="font-medium">Joshua Williams</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyReferee || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Position</label>
-              <p className="font-medium">Pastor</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyPosition || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Church</label>
-              <p className="font-medium">RCCG</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyChurch || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Address</label>
-              <p className="font-medium">No 20 Joshua Williams Osun state</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyAddress || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Phone Number</label>
-              <p className="font-medium">+234 904 452 3113</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyPhone || "N/A"}
+              </p>
             </div>
 
             <div>
               <label className="text-xs text-gray-500">Email</label>
-              <p className="font-medium">epraiz85@gmail.com</p>
+              <p className="font-medium">
+                {formData.financialReference?.clergyEmail || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -449,23 +698,33 @@ const ReviewSubmitApplication = () => {
               <label className="text-xs text-gray-500">
                 Applicant Signature
               </label>
-              <p className="font-medium">E.D</p>
+              <p className="font-medium">
+                {formData.financialReference?.applicantSignature || "N/A"}
+              </p>
             </div>
 
             <div>
-              <label className="text-xs text-gray-500">Phone Number</label>
-              <p className="font-medium">12-02-2025</p>
+              <label className="text-xs text-gray-500">Date</label>
+              <p className="font-medium">
+                {formData.financialReference?.applicantDate || "N/A"}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Submit Button */}
         <div className="flex flex-col items-center gap-4 font-inter">
+          {submitError && (
+            <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {submitError}
+            </div>
+          )}
           <button
-            onClick={() => setShowSuccessModal(true)}
-            className="w-full px-8 py-2 bg-[#D4A34A] hover:bg-[#C09340] text-[#0B2545] rounded-lg font-medium transition-colors cursor-pointer"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full px-8 py-2 bg-[#D4A34A] hover:bg-[#C09340] disabled:bg-gray-400 disabled:cursor-not-allowed text-[#0B2545] rounded-lg font-medium transition-colors cursor-pointer"
           >
-            Submit Application
+            {isSubmitting ? "Submitting..." : "Submit Application"}
           </button>
 
           <button className="px-6 py-2 border-2 border-[#D4A34A] text-[#D4A34A] rounded-lg font-medium transition-colors cursor-pointer">
@@ -476,7 +735,10 @@ const ReviewSubmitApplication = () => {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <SuccessModal setShowSuccessModal={setShowSuccessModal} />
+        <SuccessModal
+          setShowSuccessModal={setShowSuccessModal}
+          admission={submittedAdmission}
+        />
       )}
 
       {/* Programme Information Modal */}
@@ -500,9 +762,7 @@ const ReviewSubmitApplication = () => {
 
       {/* Finance Modal */}
       {showFinanceModal && (
-        <AdmissionReferenceModal
-          onClose={() => setShowFinanceModal(false)}
-        />
+        <AdmissionReferenceModal onClose={() => setShowFinanceModal(false)} />
       )}
 
       {/* Guardian Info Modal */}

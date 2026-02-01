@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface Props {
   goToNext: () => void;
@@ -11,13 +12,47 @@ const inputBase =
   "focus:outline-none focus:ring-1 focus:ring-[#D4A34A] focus:border-[#D4A34A]";
 
 const FinancialReference = ({ goToNext, goToPrev }: Props) => {
-  const [financing, setFinancing] = useState("");
-  const [hasHealthCondition, setHasHealthCondition] = useState<string | null>(
-    null
-  );
-  const [signature, setSignature] = useState("");
-  const [date, setDate] = useState("");
+  const { updateFormData, getFormData } = useAdmissionContext();
+  const [formState, setFormState] = useState({
+    financeInfo: "",
+    healthInfo: "",
+    description: "",
+    academicReferee: "",
+    academicProfession: "",
+    academicInstitution: "",
+    academicAddress: "",
+    academicPhone: "",
+    academicEmail: "",
+    clergyReferee: "",
+    clergyPosition: "",
+    clergyChurch: "",
+    clergyAddress: "",
+    clergyPhone: "",
+    clergyEmail: "",
+    applicantSignature: "",
+    applicantDate: "",
+  });
 
+  useEffect(() => {
+    const data = getFormData();
+    if (data.financialReference) {
+      setFormState(data.financialReference);
+    }
+  }, []);
+
+  const handleNext = () => {
+    updateFormData("financialReference", formState);
+    goToNext();
+  };
+
+  const handlePrev = () => {
+    updateFormData("financialReference", formState);
+    goToPrev();
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="py-8 px-4 space-y-8 font-inter">
@@ -49,8 +84,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                   type="radio"
                   name="financing"
                   value={item}
-                  checked={financing === item}
-                  onChange={(e) => setFinancing(e.target.value)}
+                  checked={formState.financeInfo === item}
+                  onChange={(e) =>
+                    handleInputChange("financeInfo", e.target.value)
+                  }
                   className="custom-radio"
                 />
                 {item}
@@ -80,8 +117,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                   type="radio"
                   name="health"
                   value={val}
-                  checked={hasHealthCondition === val}
-                  onChange={() => setHasHealthCondition(val)}
+                  checked={formState.healthInfo === val}
+                  onChange={(e) =>
+                    handleInputChange("healthInfo", e.target.value)
+                  }
                   className="custom-radio"
                 />
                 {val}
@@ -253,8 +292,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
             <input
               className={`italic ${inputBase}`}
               placeholder="Enter full name"
-              value={signature}
-              onChange={(e) => setSignature(e.target.value)}
+              value={formState.applicantSignature}
+              onChange={(e) =>
+                handleInputChange("applicantSignature", e.target.value)
+              }
             />
           </div>
 
@@ -265,8 +306,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
             <input
               type="date"
               className={inputBase}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={formState.applicantDate}
+              onChange={(e) =>
+                handleInputChange("applicantDate", e.target.value)
+              }
             />
           </div>
         </div>
@@ -279,7 +322,7 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
       >
         {/* Previous */}
         <button
-          onClick={goToPrev}
+          onClick={handlePrev}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-gray-300
@@ -290,6 +333,7 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
 
         {/* Save */}
         <button
+          onClick={() => updateFormData("financialReference", formState)}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -301,13 +345,13 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
 
         {/* Next */}
         <button
-          onClick={goToNext}
+          onClick={handleNext}
           className="w-full sm:w-auto
                bg-[#D4A34A] px-6 py-3
                rounded-xl text-[#0B2545]
                font-semibold flex items-center justify-center"
         >
-        Submit Application <ArrowRight />
+          Next <ArrowRight />
         </button>
       </div>
     </div>

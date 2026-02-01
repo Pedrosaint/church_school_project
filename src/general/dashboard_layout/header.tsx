@@ -9,6 +9,23 @@ const Header: React.FC<{ role?: string; user?: any; setMobileOpen?: any }> = ({
 }) => {
   const displayName = user?.name ?? (role === "admin" ? "Admin" : "John Doe");
 
+  // derive avatar initials from email local-part or name
+  const emailLocal = String(user?.email || "").split("@")[0] || "";
+  let initials = "JD";
+  if (emailLocal) {
+    const parts = emailLocal.split(/[._-]/).filter(Boolean);
+    if (parts.length >= 2) {
+      initials = (parts[0][0] + parts[1][0]).toUpperCase();
+    } else {
+      initials = emailLocal.slice(0, 2).toUpperCase();
+    }
+  } else if (user?.name) {
+    const nameParts = String(user.name).split(" ").filter(Boolean);
+    if (nameParts.length >= 2)
+      initials = (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+    else initials = String(user.name).slice(0, 2).toUpperCase();
+  }
+
   const today = new Date();
   const formatted = today.toLocaleDateString(undefined, {
     weekday: "long",
@@ -39,7 +56,7 @@ const Header: React.FC<{ role?: string; user?: any; setMobileOpen?: any }> = ({
           </div>
           <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden flex items-center justify-center">
             {/* Replace with <img src={user.avatar} /> */}
-            <span className="text-sm font-medium text-white">JD</span>
+            <span className="text-sm font-medium text-white">{initials}</span>
           </div>
         </div>
       </div>

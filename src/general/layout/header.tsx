@@ -38,7 +38,8 @@ const Header = () => {
         {/* LOGO */}
         <figure
           onClick={() => navigate("/")}
-          className="text-xl font-semibold cursor-pointer">
+          className="text-xl font-semibold cursor-pointer"
+        >
           <img src="/logo.svg" alt="Church Logo" />
         </figure>
 
@@ -72,9 +73,11 @@ const Header = () => {
               }
 
               if (link.dropdown) {
-                const isActive = link.dropdown.some((item) =>
-                  pathname.startsWith(item.path.split("#")[0])
-                );
+                const isActive = link.dropdown.some((item) => {
+                  const base = item.path.split("#")[0] || "/";
+                  if (base === "/") return pathname === "/";
+                  return pathname.startsWith(base);
+                });
                 return isActive ? "active" : "";
               }
 
@@ -86,8 +89,9 @@ const Header = () => {
               return (
                 <div key={link.name} className="relative group">
                   <span
-                    className={`flex items-center gap-1 cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
-                      }`}
+                    className={`flex items-center gap-1 cursor-pointer ${
+                      getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
+                    }`}
                   >
                     {link.name} <ChevronDown size={18} />
                   </span>
@@ -111,8 +115,9 @@ const Header = () => {
             return (
               <span
                 key={link.name}
-                className={`cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
-                  }`}
+                className={`cursor-pointer ${
+                  getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
+                }`}
                 onClick={() => handleScrollNavigation(link.path)}
               >
                 {link.name}
@@ -144,16 +149,19 @@ const Header = () => {
                 MOBILE MENU
       ======================================= */}
       <div
-        className={`lg:hidden fixed top-0 left-0 h-full w-[75%] md:w-[50%] bg-white shadow-lg z-40 transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`lg:hidden fixed top-0 left-0 h-full w-[75%] md:w-[50%] bg-white shadow-lg z-40 transform transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="p-6 text-[#0A2240] space-y-4">
           {navLinks.map((link) => {
             const isParentActive =
               "dropdown" in link &&
-              link.dropdown.some((item) =>
-                pathname.startsWith(item.path.split("#")[0])
-              );
+              link.dropdown.some((item) => {
+                const base = item.path.split("#")[0] || "/";
+                if (base === "/") return pathname === "/";
+                return pathname.startsWith(base);
+              });
 
             // MOBILE DROPDOWN LINKS
             if ("dropdown" in link) {
@@ -162,17 +170,19 @@ const Header = () => {
                   <button
                     onClick={() =>
                       setOpenDropdown(
-                        openDropdown === link.name ? null : link.name
+                        openDropdown === link.name ? null : link.name,
                       )
                     }
-                    className={`w-full flex justify-between items-center py-2 ${isParentActive ? "text-[#D4A95E] font-semibold" : ""
-                      }`}
+                    className={`w-full flex justify-between items-center py-2 ${
+                      isParentActive ? "text-[#D4A95E] font-semibold" : ""
+                    }`}
                   >
                     {link.name}
                     <ChevronDown
                       size={18}
-                      className={`transition-transform ${openDropdown === link.name ? "rotate-180" : ""
-                        }`}
+                      className={`transition-transform ${
+                        openDropdown === link.name ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
 

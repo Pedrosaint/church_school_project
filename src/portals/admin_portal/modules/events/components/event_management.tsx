@@ -1,50 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import{ useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { FaRegEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useGetEventsQuery, useDeleteEventMutation } from "../api/event.api";
+import { toast } from "sonner";
 
 export default function EventManagement() {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  const events = [
-    {
-      id: 1,
-      event: "Special Chapel Service",
-      date: "Jan 10, 2025",
-      time: "10:00 AM",
-      location: "Main Chapel",
-      description: "Guest speaker: Rev. Dr. Sarah Johnson",
-    },
-    {
-      id: 2,
-      event: "Registration Deadline",
-      date: "Jan 15, 2025",
-      time: "5:00 PM",
-      location: "Admin Office",
-      description: "Last day for late registration",
-    },
-    {
-      id: 3,
-      event: "Student Orientation",
-      date: "Jan 20, 2025",
-      time: "9:00 AM",
-      location: "Conference Hall",
-      description: "Orientation for new students",
-    },
-  ];
+  const { data: eventsResponse, isLoading, error } = useGetEventsQuery();
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation();
+
+  const events = eventsResponse?.data || [];
 
   const handleDelete = (event: any) => {
     setSelectedEvent(event);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting event:", selectedEvent);
-    setShowDeleteModal(false);
-    setSelectedEvent(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteEvent(selectedEvent.id).unwrap();
+      toast.success("Event deleted successfully!");
+      setShowDeleteModal(false);
+      setSelectedEvent(null);
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to delete event. Please try again.",
+      );
+    }
   };
 
   return (
@@ -58,9 +45,10 @@ export default function EventManagement() {
             </h1>
             <p className="text-gray-600">Create and manage upcoming events</p>
           </div>
-          <button 
+          <button
             onClick={() => navigate("create")}
-          className="bg-[#D4A34A] text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors cursor-pointer">
+            className="bg-[#D4A34A] text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors cursor-pointer"
+          >
             <Plus className="w-5 h-5" />
             Add New Event
           </button>
@@ -100,36 +88,41 @@ export default function EventManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {events.map((event) => (
+                {events.map((event: any) => (
                   <tr
                     key={event.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                      {event.event}
+                      {event.title}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {event.date}
+                      {new Date(event.date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {event.time}
+                      {new Date(event.date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {event.location}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-600 line-clamp-2">
                       {event.description}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <button 
-                        onClick={() => navigate(`edit/${event.id}`)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer">
+                        <button
+                          onClick={() => navigate(`edit/${event.id}`)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                        >
                           <FaRegEdit className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(event)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                          disabled={isDeleting}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer disabled:opacity-50"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
@@ -141,6 +134,52 @@ export default function EventManagement() {
             </table>
           </div>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A34A]"></div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            Failed to load events. Please try again.
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && events.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            {/* Icon */}
+            <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+
+            {/* Text */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              No events yet
+            </h3>
+            <p className="text-sm text-gray-500 mb-5 max-w-xs">
+              Events you create will appear here. Start by adding your first
+              school event.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -160,7 +199,7 @@ export default function EventManagement() {
 
               {/* Message */}
               <p className="text-gray-600 mb-8">
-                Are you sure you want to delete "{selectedEvent?.event}"? This
+                Are you sure you want to delete "{selectedEvent?.title}"? This
                 action cannot be undone.
               </p>
 
@@ -174,9 +213,10 @@ export default function EventManagement() {
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all curser-pointer"
+                  disabled={isDeleting}
+                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

@@ -32,12 +32,14 @@
 // export const { setUser, logout } = authSlice.actions;
 // export default authSlice.reducer;
 
+import { createSlice } from "@reduxjs/toolkit";
+import {
+  getSecureItem,
+  setSecureItem,
+  removeSecureItem,
+} from "../../utils/secureStorage";
 
-
-
-import { createSlice, } from "@reduxjs/toolkit";
-
-const savedUser = JSON.parse(localStorage.getItem("user") || "null");
+const savedUser = getSecureItem("user") || null;
 
 const initialState = {
   user: savedUser,
@@ -49,11 +51,11 @@ const authSlice = createSlice({
   reducers: {
     loginSuccess: (state, action) => {
       state.user = action.payload;
-      localStorage.setItem("user", JSON.stringify(action.payload));
+      setSecureItem("user", action.payload);
     },
     logout: (state) => {
       state.user = null;
-      localStorage.removeItem("user");
+      removeSecureItem("user");
     },
   },
 });

@@ -1,5 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, ChevronDown, Save, X } from "lucide-react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
+
+// Small helper to safely preview a File/Blob or remote file object
+function FilePreview({ file }: { file: any }) {
+  const [url, setUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    let objUrl: string | undefined;
+
+    if (!file) {
+      setUrl(undefined);
+      return;
+    }
+
+    // If it's a File/Blob (File inherits from Blob)
+    if (file instanceof Blob) {
+      objUrl = URL.createObjectURL(file);
+      setUrl(objUrl);
+      return () => {
+        if (objUrl) URL.revokeObjectURL(objUrl);
+      };
+    }
+
+    // If it's a string (already a URL)
+    if (typeof file === "string") {
+      setUrl(file);
+      return;
+    }
+
+    // If it's an object returned from server with fileUrl property
+    if (file && typeof file === "object" && file.fileUrl) {
+      const base = import.meta.env.VITE_API_BASE_URL ?? "";
+      setUrl(base + file.fileUrl);
+      return;
+    }
+
+    // Otherwise, no preview available
+    setUrl(undefined);
+  }, [file]);
+
+  if (!url) {
+    return (
+      <div className="w-16 h-16 rounded-md bg-gray-100 border flex items-center justify-center text-xs text-gray-400">
+        No preview
+      </div>
+    );
+  }
+
+  return <img src={url} alt="Passport preview" className="w-16 h-16 rounded-md object-cover border" />;
+}
 
 interface ProgrammeInformationProps {
   goToNext: () => void;
@@ -8,6 +58,7 @@ interface ProgrammeInformationProps {
 export default function ProgrammeInformation({
   goToNext,
 }: ProgrammeInformationProps) {
+  const { updateFormData, getFormData } = useAdmissionContext();
   const [form, setForm] = useState({
     programmeLevel: "",
     programmeChoice: "",
@@ -17,9 +68,22 @@ export default function ProgrammeInformation({
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
+  useEffect(() => {
+    const data = getFormData();
+    if (data.programmeInfo) {
+      setForm(data.programmeInfo);
+    }
+  }, []);
+
   const handleNext = () => {
+    updateFormData("programmeInfo", form);
     setLastSaved(new Date());
     goToNext();
+  };
+
+  const handleSave = () => {
+    updateFormData("programmeInfo", form);
+    setLastSaved(new Date());
   };
 
   return (
@@ -130,11 +194,7 @@ export default function ProgrammeInformation({
                   /* ---------- FILE PREVIEW ---------- */
                   <div className="relative border border-gray-300 rounded-xl p-4 flex items-center gap-4 bg-white">
                     {/* Image Preview */}
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt="Passport preview"
-                      className="w-16 h-16 rounded-md object-cover border"
-                    />
+                    <FilePreview file={file} />
 
                     {/* File Info */}
                     <div className="flex-1">
@@ -235,6 +295,7 @@ export default function ProgrammeInformation({
 
         {/* Save button */}
         <button
+          onClick={handleSave}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]

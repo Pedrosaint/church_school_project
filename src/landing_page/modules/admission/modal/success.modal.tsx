@@ -2,9 +2,27 @@ import { X } from "lucide-react";
 
 interface SuccessModalProps {
   setShowSuccessModal: React.Dispatch<React.SetStateAction<boolean>>;
+  admission?: {
+    id?: string;
+    firstname?: string;
+    surname?: string;
+    programmeChoice?: string;
+    createdAt?: string;
+  } | null;
 }
 
-const SuccessModal = ({ setShowSuccessModal }: SuccessModalProps) => {
+const SuccessModal = ({
+  setShowSuccessModal,
+  admission,
+}: SuccessModalProps) => {
+  const appNumber = admission?.id || "—";
+  const applicantName =
+    `${admission?.firstname ?? ""} ${admission?.surname ?? ""}`.trim() ||
+    "Applicant";
+  const programme = admission?.programmeChoice || "N/A";
+  const submittedOn = admission?.createdAt
+    ? new Date(admission.createdAt).toLocaleDateString()
+    : "N/A";
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -29,9 +47,7 @@ const SuccessModal = ({ setShowSuccessModal }: SuccessModalProps) => {
             <p className="text-sm text-gray-600 mb-1">
               Your Application Number:
             </p>
-            <p className="md:text-xl font-bold text-gray-900">
-              WAGGOM-2024-ADM-003457
-            </p>
+            <p className="md:text-xl font-bold text-gray-900">{appNumber}</p>
           </div>
 
           {/* Two Column Layout */}
@@ -44,19 +60,15 @@ const SuccessModal = ({ setShowSuccessModal }: SuccessModalProps) => {
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="font-semibold text-gray-900">Applicant Name:</p>
-                  <p className="text-gray-700">Emily Carter</p>
+                  <p className="text-gray-700">{applicantName}</p>
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Program:</p>
-                  <p className="text-gray-700">Master of Divinity (M.Div.)</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Term:</p>
-                  <p className="text-gray-700">Fall 2024</p>
+                  <p className="text-gray-700">{programme}</p>
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Submitted On:</p>
-                  <p className="text-gray-700">October 27, 2023</p>
+                  <p className="text-gray-700">{submittedOn}</p>
                 </div>
               </div>
             </div>
@@ -118,6 +130,6 @@ const SuccessModal = ({ setShowSuccessModal }: SuccessModalProps) => {
       </div>
     </div>
   );
-}
+};
 
-export default SuccessModal
+export default SuccessModal;

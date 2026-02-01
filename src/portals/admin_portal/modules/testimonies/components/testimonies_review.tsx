@@ -1,79 +1,51 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Eye, Check, Trash2, User } from "lucide-react";
+import { Eye, Trash2, User } from "lucide-react";
 import ViewModal from "../modal/view.modal";
 import DeleteModal from "../modal/delete.modal";
 import { EmptyState } from "../../../../../general/ui/empty_state";
+import {
+  useGetTestimoniesQuery,
+  useDeleteTestimonyMutation,
+  useApproveTestimonyMutation,
+} from "../api/testimonies.api";
+import { toast } from "sonner";
 
 interface Testimony {
-  id: number;
+  id: string;
   name: string;
-  degree: string;
-  content: string;
-  submittedDate: string;
+  email: string;
+  message: string;
+  photoUrl: string | null;
   status: "pending" | "approved";
-  avatar: string | null;
+  createdAt: string;
 }
 
 export default function TestimoniesReviews() {
-  const [testimonies, setTestimonies] = useState<Testimony[]>([
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      degree: "B.A. Theology Graduate",
-      content:
-        "My time at WAGSEM transformed my life and ministry. The theological foundation I received...",
-      submittedDate: "Dec 1, 2024",
-      status: "pending",
-      avatar: null,
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      degree: "Master's in Missions",
-      content:
-        "The missions program equipped me with practical skills and biblical knowledge that I use daily...",
-      submittedDate: "Nov 28, 2024",
-      status: "pending",
-      avatar: null,
-    },
-    {
-      id: 3,
-      name: "Ruth Adeleke",
-      degree: "M.A. Christian Education",
-      content:
-        "The Christian Education program challenged me to think deeply about pedagogy and ministry...",
-      submittedDate: "Nov 15, 2024",
-      status: "pending",
-      avatar: null,
-    },
-  ]);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedTestimony, setSelectedTestimony] = useState<Testimony | null>(
+    null,
+  );
 
   // Toggle state
   const [activeTab, setActiveTab] = useState<"pending" | "approved">("pending");
 
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedTestimony, setSelectedTestimony] = useState<Testimony | null>(
-    null
-  );
+  // Fetch testimonies for active tab
+  const { data: listResponse } = useGetTestimoniesQuery({ status: activeTab });
+  const { data: pendingResp } = useGetTestimoniesQuery({ status: "pending" });
+  const { data: approvedResp } = useGetTestimoniesQuery({ status: "approved" });
+  const [deleteTestimony] = useDeleteTestimonyMutation();
+  const [approveTestimony, { isLoading: isApproving }] =
+    useApproveTestimonyMutation();
 
-  const pendingCount = testimonies.filter((t) => t.status === "pending").length;
-  const approvedCount = testimonies.filter(
-    (t) => t.status === "approved"
-  ).length;
-
-  // Filter results based on active tab
-  const filteredTestimonies = testimonies.filter((t) => t.status === activeTab);
+  const testimonies = listResponse?.data || [];
+  const pendingCount = pendingResp?.data?.length ?? 0;
+  const approvedCount = approvedResp?.data?.length ?? 0;
 
   const handleView = (testimony: Testimony) => {
     setSelectedTestimony(testimony);
     setShowViewModal(true);
-  };
-
-  const handleApprove = (id: number) => {
-    setTestimonies(
-      testimonies.map((t) => (t.id === id ? { ...t, status: "approved" } : t))
-    );
   };
 
   const handleDelete = (testimony: Testimony) => {
@@ -81,12 +53,17 @@ export default function TestimoniesReviews() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    if (selectedTestimony) {
-      setTestimonies(testimonies.filter((t) => t.id !== selectedTestimony.id));
+  const confirmDelete = async () => {
+    if (!selectedTestimony) return;
+    try {
+      await deleteTestimony(String(selectedTestimony.id)).unwrap();
+      toast.success("Testimony deleted");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to delete testimony");
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedTestimony(null);
     }
-    setShowDeleteModal(false);
-    setSelectedTestimony(null);
   };
 
   return (
@@ -128,13 +105,13 @@ export default function TestimoniesReviews() {
 
       {/* List */}
       <div className="space-y-4">
-        {filteredTestimonies.length === 0 ? (
+        {testimonies.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
             {/* General Empty State */}
             <EmptyState type="general" tab={activeTab} />
           </div>
         ) : (
-          filteredTestimonies.map((testimony) => (
+          testimonies.map((testimony) => (
             <div
               key={testimony.id}
               className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm"
@@ -142,8 +119,16 @@ export default function TestimoniesReviews() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Avatar */}
                 <div className="shrink-0 flex sm:block">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-700 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-700 rounded-full flex items-center justify-center overflow-hidden">
+                    {testimony.photoUrl ? (
+                      <img
+                        src={testimony.photoUrl}
+                        alt={testimony.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    )}
                   </div>
                 </div>
 
@@ -153,15 +138,16 @@ export default function TestimoniesReviews() {
                     {testimony.name}
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    {testimony.degree}
+                    {testimony.email}
                   </p>
 
                   <p className="text-sm text-gray-700 mb-3 line-clamp-2 sm:line-clamp-3">
-                    {testimony.content}
+                    {testimony.message}
                   </p>
 
                   <p className="text-xs text-gray-500">
-                    Submitted {testimony.submittedDate}
+                    Submitted{" "}
+                    {new Date(testimony.createdAt).toLocaleDateString()}
                   </p>
                 </div>
 
@@ -174,16 +160,6 @@ export default function TestimoniesReviews() {
                     <Eye className="w-4 h-4" />
                     View
                   </button>
-
-                  {activeTab === "pending" && (
-                    <button
-                      onClick={() => handleApprove(testimony.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-green-600 bg-green-50 rounded-md hover:bg-green-100"
-                    >
-                      <Check className="w-4 h-4" />
-                      Approve
-                    </button>
-                  )}
 
                   <button
                     onClick={() => handleDelete(testimony)}
@@ -202,7 +178,8 @@ export default function TestimoniesReviews() {
       {showViewModal && selectedTestimony && (
         <ViewModal
           selectedTestimony={selectedTestimony}
-          handleApprove={handleApprove}
+          approveTestimony={approveTestimony}
+          isApproving={isApproving}
           setShowViewModal={setShowViewModal}
         />
       )}

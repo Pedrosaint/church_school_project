@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { EyeOff, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../slice/auth.slice";
-
+import { useAdminLoginMutation } from "../api/authApi";
+import { setSecureItem } from "../../../utils/secureStorage";
+import { toast } from "sonner";
 
 const AdminLogin: React.FC = () => {
   const dispatch = useDispatch();
+  const [adminLogin, { isLoading }] = useAdminLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
-  const [, setEmail] = useState("");
-  const [, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   // Toggle password visibility
   const togglePasswordVisibility = () => {
@@ -23,15 +26,36 @@ const AdminLogin: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(false);
 
-       dispatch(
-          loginSuccess({
-            role: "admin",
-          })
-        );
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
 
-    navigate("/dashboard/overview");
+    try {
+      const result = await adminLogin({
+        email,
+        password,
+      }).unwrap();
+
+      // Store token in secure storage
+      setSecureItem("token", result.data.accessToken);
+
+      // Dispatch login success to Redux
+      dispatch(
+        loginSuccess({
+          role: "admin",
+          email,
+          token: result.data.accessToken,
+        }),
+      );
+
+      navigate("/dashboard/overview");
+      toast.success("Login successful!");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Login failed. Please try again.");
+      setError(err?.data?.message || "Login failed. Please try again.");
+    }
   };
 
   return (
@@ -105,21 +129,22 @@ const AdminLogin: React.FC = () => {
             <input type="checkbox" className="mr-2" />
             Remember me
           </label>
-          <button
+          {/* <button
             type="button"
             className="text-[#0B2545] hover:underline cursor-pointer"
             onClick={() => navigate("forgot-password")}
           >
             Forgot Password?
-          </button>
+          </button> */}
         </div>
 
         {/* AdminLogin Button */}
         <button
           type="submit"
-          className="w-full bg-[#D4A95E] text-white py-3 rounded-sm font-semibold hover:bg-[#D4A95E]/90 cursor-pointer transition"
+          disabled={isLoading}
+          className="w-full bg-[#D4A95E] text-white py-3 rounded-sm font-semibold hover:bg-[#D4A95E]/90 cursor-pointer transition disabled:opacity-50"
         >
-          {loading ? "Logging in..." : "AdminLogin"}
+          {isLoading ? "Logging in..." : "AdminLogin"}
         </button>
       </motion.form>
 

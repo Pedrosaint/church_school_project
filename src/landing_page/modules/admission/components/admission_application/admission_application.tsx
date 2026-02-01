@@ -7,8 +7,7 @@ import ContactDetails from "./contact_details";
 import ParentGuardianForm from "./guardian_info";
 import Education from "./education";
 import FinancialReference from "./financial_reference";
-
-
+import { AdmissionProvider } from "../../context/AdmissionContext";
 
 export default function AdmissionApplication() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -34,23 +33,25 @@ export default function AdmissionApplication() {
         return <PersonalInfo goToNext={next} goToPrev={prev} />;
       case 3:
         return <ContactDetails goToNext={next} goToPrev={prev} />;
-        case 4:
+      case 4:
         return <ParentGuardianForm goToNext={next} goToPrev={prev} />;
-        case 5:
+      case 5:
         return <Education goToNext={next} goToPrev={prev} />;
-        case 6:
+      case 6:
         return <FinancialReference goToNext={next} goToPrev={prev} />;
-        case 7:
+      case 7:
         return <ReviewSubmitApplication />;
     }
   };
 
   return (
-    <div className="py-8">
-      <div className="container mx-auto px-4">
-        <Stepper steps={steps} currentStep={currentStep} />
-        <div className="max-w-7xl mx-auto mt-6">{renderStep()}</div>
+    <AdmissionProvider>
+      <div className="py-8">
+        <div className="container mx-auto px-4">
+          <Stepper steps={steps} currentStep={currentStep} />
+          <div className="max-w-7xl mx-auto mt-6">{renderStep()}</div>
+        </div>
       </div>
-    </div>
+    </AdmissionProvider>
   );
 }

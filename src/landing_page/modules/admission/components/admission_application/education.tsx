@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface AcademicHistoryProps {
   goToNext: () => void;
@@ -7,29 +8,35 @@ interface AcademicHistoryProps {
 }
 
 interface Institution {
-  institutionName: string;
+  institution: string;
   from: string;
   to: string;
   qualification: string;
 }
 
 const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
+  const { updateFormData, getFormData } = useAdmissionContext();
   const [institutions, setInstitutions] = useState<Institution[]>([
     {
-      institutionName: "",
+      institution: "",
       from: "",
       to: "",
       qualification: "",
     },
   ]);
 
-  const [, setCertificates] = useState<File | null>(null);
-  const [certificateDescription, setCertificateDescription] = useState("");
+  useEffect(() => {
+    const data = getFormData();
+    if (data.education && data.education.length > 0) {
+      setInstitutions(data.education);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInstitutionChange = (
     index: number,
     field: keyof Institution,
-    value: string
+    value: string,
   ) => {
     const updated = [...institutions];
     updated[index][field] = value;
@@ -40,7 +47,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
     setInstitutions([
       ...institutions,
       {
-        institutionName: "",
+        institution: "",
         from: "",
         to: "",
         qualification: "",
@@ -50,6 +57,16 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
   const removeInstitution = (index: number) => {
     setInstitutions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleNext = () => {
+    updateFormData("education", institutions);
+    goToNext();
+  };
+
+  const handlePrev = () => {
+    updateFormData("education", institutions);
+    goToPrev();
   };
 
   return (
@@ -94,12 +111,12 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
                 <input
                   type="text"
                   placeholder="INSTITUTION NAME"
-                  value={inst.institutionName}
+                  value={inst.institution}
                   onChange={(e) =>
                     handleInstitutionChange(
                       index,
-                      "institutionName",
-                      e.target.value
+                      "institution",
+                      e.target.value,
                     )
                   }
                   className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm
@@ -154,7 +171,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
                     handleInstitutionChange(
                       index,
                       "qualification",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                   className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm
@@ -186,7 +203,6 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             <input
               type="file"
               accept=".pdf,.jpg,.png"
-              onChange={(e) => setCertificates(e.target.files?.[0] || null)}
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -201,8 +217,6 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             <textarea
               rows={4}
               placeholder="DESCRIBE YOUR PROFESSIONAL CERTIFICATES"
-              value={certificateDescription}
-              onChange={(e) => setCertificateDescription(e.target.value)}
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm
                          focus:outline-none focus:ring-1 focus:ring-[#D4A34A] focus:border-[#D4A34A]"
             />
@@ -217,7 +231,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
       >
         {/* Previous */}
         <button
-          onClick={goToPrev}
+          onClick={handlePrev}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-gray-300
@@ -228,6 +242,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
         {/* Save */}
         <button
+          onClick={() => updateFormData("education", institutions)}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -239,7 +254,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
         {/* Next */}
         <button
-          onClick={goToNext}
+          onClick={handleNext}
           className="w-full sm:w-auto
                bg-[#D4A34A] px-6 py-3
                rounded-xl text-[#0B2545]

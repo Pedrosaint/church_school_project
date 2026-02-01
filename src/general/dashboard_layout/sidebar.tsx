@@ -4,7 +4,9 @@ import { LogOut, X } from "lucide-react";
 import { adminMenu, userMenu } from "../../lib/sidebar_links";
 import LogoutModal from "./modal/logout.modal";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useDispatch } from "react-redux";
+import { logout } from "../../auth/slice/auth.slice";
+import { clearSecureStorage } from "../../utils/secureStorage";
 
 type MenuItem = {
   label: string;
@@ -23,11 +25,20 @@ export default function Sidebar({
 }) {
   const navigate = useNavigate();
   const menu: MenuItem[] = role === "admin" ? adminMenu : userMenu;
+  const dispatch = useDispatch();
 
   const [logoutModal, setLogoutModal] = useState(false);
 
   const handleLogout = () => {
+    // clear secure storage and redux state, then navigate to login
+    try {
+      clearSecureStorage();
+    } catch (e) {
+      // ignore
+    }
+    // remove any legacy localStorage key
     localStorage.removeItem("student");
+    dispatch(logout());
     navigate(role === "admin" ? "/admin/portal" : "/student/portal/login");
   };
 
@@ -51,9 +62,10 @@ export default function Sidebar({
             to={item.path}
             onClick={() => setMobileOpen && setMobileOpen(false)} // Close on select
             className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                ? "bg-white text-slate-900 font-semibold shadow-sm"
-                : "text-white hover:bg-slate-600"
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                isActive
+                  ? "bg-white text-slate-900 font-semibold shadow-sm"
+                  : "text-white hover:bg-slate-600"
               }`
             }
           >
@@ -61,8 +73,9 @@ export default function Sidebar({
               <>
                 {item.icon && (
                   <item.icon
-                    className={`w-5 h-5 ${isActive ? "text-[#D4A34A]" : "text-white"
-                      }`}
+                    className={`w-5 h-5 ${
+                      isActive ? "text-[#D4A34A]" : "text-white"
+                    }`}
                   />
                 )}
                 <span className="text-sm">{item.label}</span>

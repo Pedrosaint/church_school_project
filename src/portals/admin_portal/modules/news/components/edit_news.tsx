@@ -1,10 +1,17 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
 import { Newspaper, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useUpdateNewsMutation, useGetNewsQuery } from "../api/news.api";
+import { toast } from "sonner";
 
 export default function EditNewsPost() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [updateNews, { isLoading }] = useUpdateNewsMutation();
+  const { data: newsResponse } = useGetNewsQuery();
+
   const [formData, setFormData] = useState({
     title: "",
     summary: "",
@@ -12,12 +19,55 @@ export default function EditNewsPost() {
     messageBody: "",
   });
 
+  // Load news data when component mounts or news data changes
+  useEffect(() => {
+    if (id && newsResponse?.data) {
+      const news = newsResponse.data.find((n: any) => n.id === id);
+      if (news) {
+        setFormData({
+          title: news.title,
+          summary: news.summary,
+          category: news.category,
+          messageBody: news.body,
+        });
+      }
+    }
+  }, [id, newsResponse]);
+
   const categories = ["Academics", "Events", "Announcements", "General"];
 
-  const handleSubmit = () => {
-    console.log("Publishing news:", formData);
-    // Add your publish logic here
-    navigate("/dashboard/admin-news");
+  const handleSubmit = async () => {
+    if (!id) {
+      toast.error("News ID not found");
+      return;
+    }
+
+    if (
+      !formData.title ||
+      !formData.summary ||
+      !formData.category ||
+      !formData.messageBody
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await updateNews({
+        id,
+        title: formData.title,
+        body: formData.messageBody,
+        summary: formData.summary,
+        category: formData.category,
+      }).unwrap();
+
+      toast.success("News updated successfully!");
+      navigate("/dashboard/admin-news");
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to update news. Please try again.",
+      );
+    }
   };
 
   const handleCancel = () => {
@@ -136,10 +186,11 @@ export default function EditNewsPost() {
           <div className="flex items-center gap-3 pt-4">
             <button
               onClick={handleSubmit}
-              className="bg-[#D4A34A] hover:bg-[#C09340] cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              disabled={isLoading}
+              className="bg-[#D4A34A] hover:bg-[#C09340] disabled:opacity-50 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               <Newspaper className="w-5 h-5" />
-              Publish News
+              {isLoading ? "Updating..." : "Update News"}
             </button>
             <button
               onClick={handleCancel}

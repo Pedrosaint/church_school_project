@@ -3,56 +3,35 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FaRegEdit } from "react-icons/fa";
-
-
-interface NewsItem {
-  id: number;
-  title: string;
-  excerpt: string;
-  publishDate: string;
-  tag: string;
-  tagColor: string;
-  content: string;
-}
+import { useGetNewsQuery, useDeleteNewsMutation } from "../api/news.api";
+import { toast } from "sonner";
 
 export default function NewsManagement() {
-const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<any | null>(null);
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { data: newsResponse, isLoading, error } = useGetNewsQuery();
+  const [deleteNews, { isLoading: isDeleting }] = useDeleteNewsMutation();
 
-  const newsItems = [
-    {
-      id: 1,
-      title: "Spring 2025 Registration Now Open",
-      excerpt: "Complete your course registration before the deadline.",
-      publishDate: "December 1, 2024",
-      tag: "Academics",
-      tagColor: "bg-blue-100 text-blue-800",
-      content:
-        "All students are required to complete their course registration before January 15th, 2025. Late registration will attract additional fees.",
-    },
-    {
-      id: 2,
-      title: "Spring 2025 Registration Now Open",
-      excerpt: "Complete your course registration before the deadline.",
-      publishDate: "December 1, 2024",
-      tag: "Events",
-      tagColor: "bg-amber-100 text-amber-800",
-      content:
-        "All students are required to complete their course registration before January 15th, 2025. Late registration will attract additional fees.",
-    },
-  ];
+  const newsItems = newsResponse?.data || [];
 
   const handleDelete = (news: any) => {
     setSelectedNews(news);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting news:", selectedNews);
-    setShowDeleteModal(false);
-    setSelectedNews(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteNews(selectedNews.id).unwrap();
+      toast.success("News deleted successfully!");
+      setShowDeleteModal(false);
+      setSelectedNews(null);
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to delete news. Please try again.",
+      );
+    }
   };
 
   return (
@@ -84,9 +63,55 @@ const navigate = useNavigate();
           </p>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A34A]"></div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            Failed to load news. Please try again.
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && newsItems.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            {/* Icon */}
+            <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h9l5 5v9a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+
+            {/* Text */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              No news posts yet
+            </h3>
+            <p className="text-sm text-gray-500 mb-5 max-w-xs">
+              News updates you publish will appear here. Keep your school
+              community informed by posting your first update.
+            </p>
+          </div>
+        )}
+
         {/* News List */}
         <div className="space-y-4">
-          {newsItems.map((news) => (
+          {newsItems.map((news: any) => (
             <div
               key={news.id}
               className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
@@ -97,41 +122,41 @@ const navigate = useNavigate();
                   <h3 className="text-lg font-semibold text-gray-900">
                     {news.title}
                   </h3>
-                  <span
-                    className={`${news.tagColor} px-3 py-1 rounded-full text-xs font-medium`}
-                  >
-                    {news.tag}
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                    {news.category}
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <button 
-                  onClick={() => navigate(`edit/${news.id}`)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                  <button
+                    onClick={() => navigate(`edit/${news.id}`)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                  >
                     <FaRegEdit className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(news)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                    disabled={isDeleting}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Excerpt */}
-              <p className="text-gray-600 text-sm mb-2">{news.excerpt}</p>
+              {/* Summary */}
+              <p className="text-gray-600 text-sm mb-2">{news.body}</p>
 
               {/* Published Date */}
               <p className="text-gray-500 text-sm mb-4">
-                Published on {news.publishDate}
+                Published on {new Date(news.createdAt).toLocaleDateString()}
               </p>
 
               {/* Divider */}
               <div className="border-t border-gray-200 my-4"></div>
 
               {/* Content */}
-              <p className="text-gray-700 text-sm leading-relaxed">
-                {news.content}
+              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                {news.summary}
               </p>
             </div>
           ))}
@@ -169,9 +194,10 @@ const navigate = useNavigate();
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all cursor-pointer"
+                  disabled={isDeleting}
+                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

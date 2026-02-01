@@ -3,11 +3,16 @@ import { Filter, Download } from "lucide-react";
 import type { DropdownOption } from "./dropdown";
 import Dropdown from "./dropdown";
 
-const FiltersBar = () => {
+const FiltersBar = ({
+  status,
+  onStatusChange,
+}: {
+  status: string;
+  onStatusChange: (s: string) => void;
+}) => {
   const statusOptions: DropdownOption[] = [
     { label: "All Statuses", value: "all" },
     { label: "Pending", value: "pending" },
-    { label: "Under Review", value: "review" },
     { label: "Approved", value: "approved" },
     { label: "Rejected", value: "rejected" },
   ];
@@ -15,7 +20,7 @@ const FiltersBar = () => {
   const programmeOptions: DropdownOption[] = [
     { label: "All Programmes", value: "all" },
     { label: "Bachelor", value: "bachelor" },
-    { label: "Master", value: "master" },
+    { label: "Masters", value: "masters" },
     { label: "Doctorate", value: "doctorate" },
   ];
 
@@ -25,7 +30,8 @@ const FiltersBar = () => {
     { label: "Scholarship", value: "scholarship" },
   ];
 
-  const [status, setStatus] = useState(statusOptions[0]);
+  const selectedStatusOption =
+    statusOptions.find((o) => o.value === status) ?? statusOptions[0];
   const [programme, setProgramme] = useState(programmeOptions[0]);
   const [finance, setFinance] = useState(financeOptions[0]);
 
@@ -46,9 +52,9 @@ const FiltersBar = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <Dropdown
           label="Status"
-          value={status}
+          value={selectedStatusOption}
           options={statusOptions}
-          onChange={setStatus}
+          onChange={(opt) => onStatusChange(opt.value)}
         />
         <Dropdown
           label="Programme Level"

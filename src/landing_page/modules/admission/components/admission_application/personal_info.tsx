@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface PersonalInfoProps {
   goToNext: () => void;
@@ -10,6 +11,7 @@ export default function PersonalInfo({
   goToNext,
   goToPrev,
 }: PersonalInfoProps) {
+  const { updateFormData, getFormData } = useAdmissionContext();
   const [form, setForm] = useState({
     surname: "",
     firstName: "",
@@ -20,11 +22,29 @@ export default function PersonalInfo({
     gender: "",
   });
 
+  // Load existing data on mount
+  useEffect(() => {
+    const data = getFormData();
+    if (data.personalInfo) {
+      setForm(data.personalInfo);
+    }
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNext = () => {
+    updateFormData("personalInfo", form);
+    goToNext();
+  };
+
+  const handlePrev = () => {
+    updateFormData("personalInfo", form);
+    goToPrev();
   };
 
   return (
@@ -162,7 +182,7 @@ export default function PersonalInfo({
       >
         {/* Previous */}
         <button
-          onClick={goToPrev}
+          onClick={handlePrev}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-gray-300
@@ -173,6 +193,7 @@ export default function PersonalInfo({
 
         {/* Save */}
         <button
+          onClick={() => updateFormData("personalInfo", form)}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -184,7 +205,7 @@ export default function PersonalInfo({
 
         {/* Next */}
         <button
-          onClick={goToNext}
+          onClick={handleNext}
           className="w-full sm:w-auto
                bg-[#D4A34A] px-6 py-3
                rounded-xl text-[#0B2545]

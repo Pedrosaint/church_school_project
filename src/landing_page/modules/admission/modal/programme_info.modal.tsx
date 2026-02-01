@@ -15,8 +15,50 @@ export default function ProgrammeInfoModal({
     passport2: null as File | null,
   });
 
+  // Small helper to safely preview a File/Blob or remote file object
+  function FilePreview({ file }: { file: any }) {
+    const [url, setUrl] = useState<string | undefined>(undefined);
 
-  if (!open) return null;
+    useEffect(() => {
+      let objUrl: string | undefined;
+
+      if (!file) {
+        setUrl(undefined);
+        return;
+      }
+
+      if (file instanceof Blob) {
+        objUrl = URL.createObjectURL(file);
+        setUrl(objUrl);
+        return () => {
+          if (objUrl) URL.revokeObjectURL(objUrl);
+        };
+      }
+
+      if (typeof file === "string") {
+        setUrl(file);
+        return;
+      }
+
+      if (file && typeof file === "object" && file.fileUrl) {
+        const base = import.meta.env.VITE_API_BASE_URL ?? "";
+        setUrl(base + file.fileUrl);
+        return;
+      }
+
+      setUrl(undefined);
+    }, [file]);
+
+    if (!url) {
+      return (
+        <div className="w-16 h-16 rounded-md bg-gray-100 border flex items-center justify-center text-xs text-gray-400">
+          No preview
+        </div>
+      );
+    }
+
+    return <img src={url} alt="Passport preview" className="w-16 h-16 rounded-md object-cover border" />;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -134,11 +176,7 @@ export default function ProgrammeInfoModal({
                     </label>
                   ) : (
                     <div className="relative border border-gray-300 rounded-xl p-4 flex items-center gap-4 bg-white">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt="Passport preview"
-                        className="w-16 h-16 rounded-md object-cover border"
-                      />
+                      <FilePreview file={file} />
 
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-700 truncate">

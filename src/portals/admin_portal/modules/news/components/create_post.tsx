@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Newspaper, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useCreateNewsMutation } from "../api/news.api";
+import { toast } from "sonner";
 
 export default function CreateNewsPost() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [createNews, { isLoading }] = useCreateNewsMutation();
   const [formData, setFormData] = useState({
     title: "",
     summary: "",
@@ -14,10 +18,39 @@ export default function CreateNewsPost() {
 
   const categories = ["Academics", "Events", "Announcements", "General"];
 
-  const handleSubmit = () => {
-    console.log("Publishing news:", formData);
-    // Add your publish logic here
-    navigate("/dashboard/admin-news");
+  const handleSubmit = async () => {
+    if (
+      !formData.title ||
+      !formData.summary ||
+      !formData.category ||
+      !formData.messageBody
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await createNews({
+        title: formData.title,
+        body: formData.messageBody,
+        summary: formData.summary,
+        category: formData.category,
+      }).unwrap();
+
+      toast.success("News published successfully!");
+      setFormData({
+        title: "",
+        summary: "",
+        category: "",
+        messageBody: "",
+      });
+      navigate("/dashboard/admin-news");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to publish news. Please try again.");
+      toast.error(
+        err?.data?.message || "Failed to publish news. Please try again.",
+      );
+    }
   };
 
   const handleCancel = () => {
@@ -136,10 +169,11 @@ export default function CreateNewsPost() {
           <div className="flex items-center gap-3 pt-4">
             <button
               onClick={handleSubmit}
-              className="bg-[#D4A34A] hover:bg-[#C09340] cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              disabled={isLoading}
+              className="bg-[#D4A34A] hover:bg-[#C09340] disabled:opacity-50 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               <Newspaper className="w-5 h-5" />
-              Publish News
+              {isLoading ? "Publishing..." : "Publish News"}
             </button>
             <button
               onClick={handleCancel}

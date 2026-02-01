@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface AcademicHistoryProps {
   goToNext: () => void;
@@ -7,6 +8,7 @@ interface AcademicHistoryProps {
 }
 
 const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
+  const { updateFormData, getFormData } = useAdmissionContext();
   const [form, setForm] = useState({
     presentAddress: "",
     phone: "",
@@ -15,17 +17,36 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
     postalAddress: "",
     nationality: "",
     nativeLanguage: "",
-    placeOfBirthDiff: "",
+    placeDiffNationality: false,
     maritalStatus: "",
     religion: "",
     denomination: "",
   });
 
+  useEffect(() => {
+    const data = getFormData();
+    if (data.contactDetails) {
+      setForm(data.contactDetails);
+    }
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    const { name, value, type } = e.target;
+    const val =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+    setForm((p) => ({ ...p, [name]: val }));
+  };
+
+  const handleNext = () => {
+    updateFormData("contactDetails", form);
+    goToNext();
+  };
+
+  const handlePrev = () => {
+    updateFormData("contactDetails", form);
+    goToPrev();
   };
 
   return (
@@ -218,7 +239,7 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
       >
         {/* Previous */}
         <button
-          onClick={goToPrev}
+          onClick={handlePrev}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-gray-300
@@ -229,6 +250,7 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
         {/* Save */}
         <button
+          onClick={() => updateFormData("contactDetails", form)}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -240,7 +262,7 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
         {/* Next */}
         <button
-          onClick={goToNext}
+          onClick={handleNext}
           className="w-full sm:w-auto
                bg-[#D4A34A] px-6 py-3
                rounded-xl text-[#0B2545]

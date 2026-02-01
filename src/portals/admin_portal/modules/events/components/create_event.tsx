@@ -1,22 +1,61 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Calendar, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useCreateEventMutation } from "../api/event.api";
+import { toast } from "sonner";
 
 export default function CreateEvent() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [createEvent, { isLoading }] = useCreateEventMutation();
   const [formData, setFormData] = useState({
-    eventTitle: "",
+    title: "",
     date: "",
     time: "",
     location: "",
     description: "",
   });
 
-  const handleSubmit = () => {
-    console.log("Creating event:", formData);
-    // Add your create event logic here
-    navigate("/dashboard/events");
+  const handleSubmit = async () => {
+    if (
+      !formData.title ||
+      !formData.date ||
+      !formData.time ||
+      !formData.location ||
+      !formData.description
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      // Combine date and time into ISO string
+      const dateTime = new Date(
+        `${formData.date}T${formData.time}`,
+      ).toISOString();
+
+      await createEvent({
+        title: formData.title,
+        date: dateTime,
+        location: formData.location,
+        description: formData.description,
+      }).unwrap();
+
+      toast.success("Event created successfully!");
+      setFormData({
+        title: "",
+        date: "",
+        time: "",
+        location: "",
+        description: "",
+      });
+      navigate("/dashboard/events");
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to create event. Please try again.",
+      );
+    }
   };
 
   const handleCancel = () => {
@@ -53,9 +92,9 @@ export default function CreateEvent() {
             </label>
             <input
               type="text"
-              value={formData.eventTitle}
+              value={formData.title}
               onChange={(e) =>
-                setFormData({ ...formData, eventTitle: e.target.value })
+                setFormData({ ...formData, title: e.target.value })
               }
               placeholder="Enter event title"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition bg-gray-50"
@@ -133,10 +172,11 @@ export default function CreateEvent() {
           <div className="flex items-center gap-3 pt-4">
             <button
               onClick={handleSubmit}
-              className="bg-[#D4A34A] hover:bg-[#C09340] cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              disabled={isLoading}
+              className="bg-[#D4A34A] hover:bg-[#C09340] disabled:opacity-50 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
             >
               <Calendar className="w-5 h-5" />
-              Create Event
+              {isLoading ? "Creating..." : "Create Event"}
             </button>
             <button
               onClick={handleCancel}
