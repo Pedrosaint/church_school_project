@@ -60,7 +60,7 @@ export default function CreateEvent() {
 
   const handleCancel = () => {
     setFormData({
-      eventTitle: "",
+      title: "",
       date: "",
       time: "",
       location: "",

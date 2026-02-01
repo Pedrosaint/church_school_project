@@ -48,7 +48,13 @@ function FilePreview({ file }: { file: any }) {
     );
   }
 
-  return <img src={url} alt="Passport preview" className="w-16 h-16 rounded-md object-cover border" />;
+  return (
+    <img
+      src={url}
+      alt="Passport preview"
+      className="w-16 h-16 rounded-md object-cover border"
+    />
+  );
 }
 
 interface ProgrammeInformationProps {

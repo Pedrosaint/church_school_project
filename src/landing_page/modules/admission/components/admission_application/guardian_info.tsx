@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAdmissionContext } from "../../context/AdmissionContext";
 
 interface GuardianInfoProps {
@@ -9,20 +9,17 @@ interface GuardianInfoProps {
 
 const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
   const { updateFormData, getFormData } = useAdmissionContext();
-  const [formData, setFormData] = useState({
-    parentGuardian: "",
-    emergencyContact: "",
-    emergencyPhone: "",
-    nextOfKin: "",
-    nextOfKinPhone: "",
+  const [formData, setFormData] = useState(() => {
+    const saved = getFormData();
+    const g = saved?.guardianInfo ?? {};
+    return {
+      parentGuardian: g.parentGuardian ?? "",
+      emergencyContact: g.emergencyContact ?? "",
+      emergencyPhone: g.emergencyPhone ?? "",
+      nextOfKin: g.nextOfKin ?? "",
+      nextOfKinPhone: g.nextOfKinPhone ?? "",
+    } as const;
   });
-
-  useEffect(() => {
-    const data = getFormData();
-    if (data.guardianInfo) {
-      setFormData(data.guardianInfo);
-    }
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -55,8 +52,8 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
             <span className="text-red-500">*</span>
           </label>
           <textarea
-            name="parentAddress"
-            value={formData.parentAddress}
+            name="parentGuardian"
+            value={formData.parentGuardian}
             onChange={handleChange}
             placeholder="NAME AND FULL ADDRESS"
             rows={4}
@@ -74,8 +71,8 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
             Name and Address <span className="text-red-500">*</span>
           </label>
           <textarea
-            name="emergencyNameAddress"
-            value={formData.emergencyNameAddress}
+            name="emergencyContact"
+            value={formData.emergencyContact}
             onChange={handleChange}
             placeholder="NAME AND FULL ADDRESS"
             rows={4}
@@ -103,8 +100,8 @@ const ParentGuardianForm = ({ goToNext, goToPrev }: GuardianInfoProps) => {
             Name and Address <span className="text-red-500">*</span>
           </label>
           <textarea
-            name="nextOfKinNameAddress"
-            value={formData.nextOfKinNameAddress}
+            name="nextOfKin"
+            value={formData.nextOfKin}
             onChange={handleChange}
             placeholder="NAME AND FULL ADDRESS"
             rows={4}

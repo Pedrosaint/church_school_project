@@ -79,7 +79,7 @@ export default function EditEvent() {
 
   const handleCancel = () => {
     setFormData({
-      eventTitle: "",
+      title: "",
       date: "",
       time: "",
       location: "",

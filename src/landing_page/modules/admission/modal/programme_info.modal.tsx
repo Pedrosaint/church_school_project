@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
 
 interface ProgrammeInfoModalProps {
@@ -57,7 +57,13 @@ export default function ProgrammeInfoModal({
       );
     }
 
-    return <img src={url} alt="Passport preview" className="w-16 h-16 rounded-md object-cover border" />;
+    return (
+      <img
+        src={url}
+        alt="Passport preview"
+        className="w-16 h-16 rounded-md object-cover border"
+      />
+    );
   }
 
   return (
