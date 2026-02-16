@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionContext } from "../../context/AdmissionContext";

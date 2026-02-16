@@ -34,15 +34,15 @@ const ReviewSubmitApplication = () => {
 
   const buildFormData = (): FormData => {
     const data = getFormData();
-    const formData = new FormData();
+    const payload = new FormData();
 
     // Programme Info
     if (data.programmeInfo) {
-      formData.append(
+      payload.append(
         "programmeLevel",
         data.programmeInfo.programmeLevel || "",
       );
-      formData.append(
+      payload.append(
         "programmeChoice",
         data.programmeInfo.programmeChoice || "",
       );
@@ -50,130 +50,148 @@ const ReviewSubmitApplication = () => {
 
     // Personal Info
     if (data.personalInfo) {
-      formData.append("surname", data.personalInfo.surname || "");
-      formData.append("firstname", data.personalInfo.firstName || "");
-      formData.append("otherNames", data.personalInfo.otherNames || "");
-      formData.append("title", data.personalInfo.title || "");
-      formData.append("dateOfBirth", data.personalInfo.dateOfBirth || "");
-      formData.append("placeOfBirth", data.personalInfo.placeOfBirth || "");
-      formData.append("gender", data.personalInfo.gender || "");
+      payload.append("surname", data.personalInfo.surname || "");
+      payload.append("firstname", data.personalInfo.firstName || "");
+      payload.append("otherNames", data.personalInfo.otherNames || "");
+      payload.append("title", data.personalInfo.title || "");
+      payload.append("dateOfBirth", data.personalInfo.dateOfBirth || "");
+      payload.append("placeOfBirth", data.personalInfo.placeOfBirth || "");
+      payload.append("gender", data.personalInfo.gender || "");
     }
 
     // Contact Details
     if (data.contactDetails) {
-      formData.append("email", data.contactDetails.email || "");
-      formData.append("phone", data.contactDetails.phone || "");
-      formData.append(
+      payload.append("email", data.contactDetails.email || "");
+      payload.append("phone", data.contactDetails.phone || "");
+      payload.append(
         "presentAddress",
         data.contactDetails.presentAddress || "",
       );
-      formData.append(
+      payload.append(
         "permanentAddress",
         data.contactDetails.permanentAddress || "",
       );
-      formData.append("postalAddress", data.contactDetails.postalAddress || "");
-      formData.append("nationality", data.contactDetails.nationality || "");
-      formData.append(
+      payload.append("postalAddress", data.contactDetails.postalAddress || "");
+      payload.append("nationality", data.contactDetails.nationality || "");
+      payload.append(
         "nativeLanguage",
         data.contactDetails.nativeLanguage || "",
       );
-      formData.append(
+      payload.append(
         "placeDiffNationality",
-        data.contactDetails.placeDiffNationality || false,
+        String(data.contactDetails.placeDiffNationality || false),
       );
-      formData.append("maritalStatus", data.contactDetails.maritalStatus || "");
-      formData.append("religion", data.contactDetails.religion || "");
-      formData.append("denomination", data.contactDetails.denomination || "");
+      payload.append("maritalStatus", data.contactDetails.maritalStatus || "");
+      payload.append("religion", data.contactDetails.religion || "");
+      payload.append("denomination", data.contactDetails.denomination || "");
     }
 
     // Guardian Info
     if (data.guardianInfo) {
-      formData.append("parentGuardian", data.guardianInfo.parentGuardian || "");
-      formData.append(
+      payload.append("parentGuardian", data.guardianInfo.parentGuardian || "");
+      payload.append(
         "emergencyContact",
         data.guardianInfo.emergencyContact || "",
       );
-      formData.append("emergencyPhone", data.guardianInfo.emergencyPhone || "");
-      formData.append("nextOfKin", data.guardianInfo.nextOfKin || "");
-      formData.append("nextOfKinPhone", data.guardianInfo.nextOfKinPhone || "");
+      payload.append("emergencyPhone", data.guardianInfo.emergencyPhone || "");
+      payload.append("nextOfKin", data.guardianInfo.nextOfKin || "");
+      payload.append("nextOfKinPhone", data.guardianInfo.nextOfKinPhone || "");
     }
 
     // Education
-    if (data.education && data.education.length > 0) {
-      formData.append("education", JSON.stringify(data.education));
+    if (data.education) {
+      const institutions = Array.isArray(data.education)
+        ? data.education
+        : (data.education.institutions || []);
+
+      payload.append("education", JSON.stringify(institutions));
+
+      if (!Array.isArray(data.education)) {
+        // If we have certificates, append them to the 'certificates' key
+        if (data.education.certificates) {
+          data.education.certificates.forEach((file: File) => {
+            if (file instanceof File) {
+              payload.append("certificates", file);
+            }
+          });
+        }
+      }
     }
 
     // Financial & Reference
     if (data.financialReference) {
-      formData.append("financeInfo", data.financialReference.financeInfo || "");
-      formData.append("healthInfo", data.financialReference.healthInfo || "");
-      formData.append("description", data.financialReference.description || "");
-      formData.append(
+      payload.append("financeInfo", data.financialReference.financeInfo || "");
+      payload.append("healthInfo", data.financialReference.healthInfo || "");
+
+      // Use the 'description' field for any additional notes
+      const notes = [
+        data.financialReference.description,
+        !Array.isArray(data.education) ? data.education.description : ""
+      ].filter(Boolean).join(" | ");
+
+      payload.append("description", notes || "");
+
+      payload.append(
         "academicReferee",
         data.financialReference.academicReferee || "",
       );
-      formData.append(
+      payload.append(
         "academicProfession",
         data.financialReference.academicProfession || "",
       );
-      formData.append(
+      payload.append(
         "academicInstitution",
         data.financialReference.academicInstitution || "",
       );
-      formData.append(
+      payload.append(
         "academicAddress",
         data.financialReference.academicAddress || "",
       );
-      formData.append(
+      payload.append(
         "academicPhone",
         data.financialReference.academicPhone || "",
       );
-      formData.append(
+      payload.append(
         "academicEmail",
         data.financialReference.academicEmail || "",
       );
-      formData.append(
+      payload.append(
         "clergyReferee",
         data.financialReference.clergyReferee || "",
       );
-      formData.append(
+      payload.append(
         "clergyPosition",
         data.financialReference.clergyPosition || "",
       );
-      formData.append(
+      payload.append(
         "clergyChurch",
         data.financialReference.clergyChurch || "",
       );
-      formData.append(
+      payload.append(
         "clergyAddress",
         data.financialReference.clergyAddress || "",
       );
-      formData.append("clergyPhone", data.financialReference.clergyPhone || "");
-      formData.append("clergyEmail", data.financialReference.clergyEmail || "");
-      formData.append(
+      payload.append("clergyPhone", data.financialReference.clergyPhone || "");
+      payload.append("clergyEmail", data.financialReference.clergyEmail || "");
+      payload.append(
         "applicantSignature",
         data.financialReference.applicantSignature || "",
       );
-      formData.append(
+      payload.append(
         "applicantDate",
         data.financialReference.applicantDate || "",
       );
     }
 
-    // Files
-    if (data.programmeInfo?.certificateFiles) {
-      data.programmeInfo.certificateFiles.forEach((file: File) => {
-        formData.append("certificates", file);
-      });
+    // Files from Programme Info - append to 'passportPhotos' key
+    if (data.programmeInfo?.passport1 instanceof File) {
+      payload.append("passportPhotos", data.programmeInfo.passport1);
+    }
+    if (data.programmeInfo?.passport2 instanceof File) {
+      payload.append("passportPhotos", data.programmeInfo.passport2);
     }
 
-    if (data.programmeInfo?.passportPhotos) {
-      data.programmeInfo.passportPhotos.forEach((file: File) => {
-        formData.append("passportPhotos", file);
-      });
-    }
-
-    return formData;
+    return payload;
   };
 
   const handleSubmit = async () => {
@@ -181,21 +199,25 @@ const ReviewSubmitApplication = () => {
     setSubmitError(null);
 
     try {
-      const formData = buildFormData();
-      const res = await submitAdmission(formData).unwrap();
-      // clear saved form data
+      const payload = buildFormData();
+      const res = await submitAdmission(payload).unwrap();
       resetForm();
       setSubmittedAdmission(res.data ?? null);
       setShowSuccessModal(true);
-    } catch (error) {
+    } catch (error: any) {
+      // RTK Query wraps error data in a data property
+      const errData = error?.data || error;
       setSubmitError(
-        error instanceof Error ? error.message : "Failed to submit application",
+        errData?.error || errData?.message || "Failed to submit application",
       );
       console.error("Submission error:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+
+
 
   return (
     <div className="py-8 md:px-4">
@@ -242,22 +264,21 @@ const ReviewSubmitApplication = () => {
               </p>
             </div>
 
-            {formData.programmeInfo?.certificateFiles &&
-              formData.programmeInfo.certificateFiles.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FileText className="w-4 h-4" />
-                  {formData.programmeInfo.certificateFiles[0].name}
-                </div>
-              )}
+            {formData.programmeInfo?.passport1 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <FileText className="w-4 h-4" />
+                <span className="truncate">Passport 1: {formData.programmeInfo.passport1.name}</span>
+              </div>
+            )}
 
-            {formData.programmeInfo?.passportPhotos &&
-              formData.programmeInfo.passportPhotos.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FileText className="w-4 h-4" />
-                  {formData.programmeInfo.passportPhotos[0].name}
-                </div>
-              )}
+            {formData.programmeInfo?.passport2 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <FileText className="w-4 h-4" />
+                <span className="truncate">Passport 2: {formData.programmeInfo.passport2.name}</span>
+              </div>
+            )}
           </div>
+
         </div>
 
         {/* ================= Personal Info ================= */}
@@ -501,8 +522,8 @@ const ReviewSubmitApplication = () => {
           </div>
 
           {/* Qualification Details */}
-          {formData.education && formData.education.length > 0 ? (
-            formData.education.map((edu: any, idx: number) => (
+          {formData.education?.institutions && formData.education.institutions.length > 0 ? (
+            formData.education.institutions.map((edu: any, idx: number) => (
               <div key={idx}>
                 <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
                   <div>
@@ -535,7 +556,7 @@ const ReviewSubmitApplication = () => {
                     </p>
                   </div>
                 </div>
-                {idx < formData.education.length - 1 && (
+                {idx < formData.education.institutions.length - 1 && (
                   <div className="border-t border-gray-200" />
                 )}
               </div>
@@ -547,7 +568,32 @@ const ReviewSubmitApplication = () => {
               </p>
             </div>
           )}
+
+          {/* Certificates & Description */}
+          {(formData.education?.certificates?.length > 0 || formData.education?.description) && (
+            <div className="border-t border-gray-200 px-6 py-4">
+              {formData.education.certificates.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs text-gray-500 mb-2">Uploaded Certificates</p>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.education.certificates.map((file: any, idx: number) => (
+                      <span key={idx} className="bg-gray-100 text-[#0B2545] text-xs px-2 py-1 rounded border border-gray-200">
+                        {file.name || `Certificate ${idx + 1}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {formData.education.description && (
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Education Description</p>
+                  <p className="text-sm text-gray-900">{formData.education.description}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* ================= Finance & Referee ================= */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm font-inter">

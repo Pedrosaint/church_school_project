@@ -2,15 +2,28 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { navLinks } from "../../lib/nav_links";
 import { ChevronDown, Menu, SearchIcon, X } from "lucide-react";
 import { useState } from "react";
+import { useSearch } from "../context/SearchContext";
 
 const Header = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const {
+    searchQuery,
+    setSearchQuery,
+  } = useSearch();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const toggleMobile = () => setMobileOpen(!mobileOpen);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value && pathname !== "/academic") {
+      navigate("/academic");
+    }
+  };
 
   // Handle routes with hash scrolling logic
   const handleScrollNavigation = (path: string) => {
@@ -89,9 +102,8 @@ const Header = () => {
               return (
                 <div key={link.name} className="relative group">
                   <span
-                    className={`flex items-center gap-1 cursor-pointer ${
-                      getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
-                    }`}
+                    className={`flex items-center gap-1 cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
+                      }`}
                   >
                     {link.name} <ChevronDown size={18} />
                   </span>
@@ -115,9 +127,8 @@ const Header = () => {
             return (
               <span
                 key={link.name}
-                className={`cursor-pointer ${
-                  getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
-                }`}
+                className={`cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
+                  }`}
                 onClick={() => handleScrollNavigation(link.path)}
               >
                 {link.name}
@@ -149,9 +160,8 @@ const Header = () => {
                 MOBILE MENU
       ======================================= */}
       <div
-        className={`lg:hidden fixed top-0 left-0 h-full w-[75%] md:w-[50%] bg-white shadow-lg z-40 transform transition-transform duration-300 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`lg:hidden fixed top-0 left-0 h-full w-[75%] md:w-[50%] bg-white shadow-lg z-40 transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="p-6 text-[#0A2240] space-y-4">
           {navLinks.map((link) => {
@@ -173,16 +183,14 @@ const Header = () => {
                         openDropdown === link.name ? null : link.name,
                       )
                     }
-                    className={`w-full flex justify-between items-center py-2 ${
-                      isParentActive ? "text-[#D4A95E] font-semibold" : ""
-                    }`}
+                    className={`w-full flex justify-between items-center py-2 ${isParentActive ? "text-[#D4A95E] font-semibold" : ""
+                      }`}
                   >
                     {link.name}
                     <ChevronDown
                       size={18}
-                      className={`transition-transform ${
-                        openDropdown === link.name ? "rotate-180" : ""
-                      }`}
+                      className={`transition-transform ${openDropdown === link.name ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
 
@@ -244,15 +252,20 @@ const Header = () => {
       </div>
 
       {/* SEARCH BAR UNDER HEADER */}
-      <div className="w-full bg-white shadow-sm border-t border-gray-200 font-inter">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center w-full max-w-2xl self-end rounded-lg border border-gray-300 py-2 px-4 ">
-            <SearchIcon className="w-7 h-7 text-[#D4A95E]" />
-            <input
-              type="text"
-              placeholder="Search courses, programs, departments..."
-              className="w-full outline-none indent-2"
-            />
+      <div className="w-full bg-white shadow-sm border-t border-gray-200 font-inter py-3 overflow-visible">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl px-5">
+          {/* Search Input */}
+          <div className="flex-1 w-full relative">
+            <div className="flex items-center w-full rounded-lg border border-gray-300 py-2.5 px-4 focus-within:ring-2 focus-within:ring-[#D4A95E] focus-within:border-transparent">
+              <SearchIcon className="w-5 h-5 text-[#D4A95E] shrink-0" />
+              <input
+                type="text"
+                placeholder="Search courses, programs, departments..."
+                className="w-full outline-none indent-2 text-sm"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </div>
           </div>
         </div>
       </div>

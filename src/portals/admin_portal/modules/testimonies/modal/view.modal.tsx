@@ -2,6 +2,7 @@
 import { User } from "lucide-react";
 import { IoCheckmarkSharp } from "react-icons/io5";
 import { toast } from "sonner";
+import { getMediaUrl } from "../../../../../utils/media";
 
 interface TestimonyProps {
   selectedTestimony: any;
@@ -36,7 +37,7 @@ const ViewModal = ({
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-700 rounded-full flex items-center justify-center overflow-hidden">
               {selectedTestimony.photoUrl ? (
                 <img
-                  src={selectedTestimony.photoUrl}
+                  src={getMediaUrl(selectedTestimony.photoUrl)}
                   alt={selectedTestimony.name}
                   className="w-full h-full object-cover"
                 />

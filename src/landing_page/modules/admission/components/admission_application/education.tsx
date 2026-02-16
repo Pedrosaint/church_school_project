@@ -16,19 +16,28 @@ interface Institution {
 
 const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
   const { updateFormData, getFormData } = useAdmissionContext();
-  const [institutions, setInstitutions] = useState<Institution[]>([
-    {
-      institution: "",
-      from: "",
-      to: "",
-      qualification: "",
-    },
-  ]);
+  const [educationData, setEducationData] = useState({
+    institutions: [
+      {
+        institution: "",
+        from: "",
+        to: "",
+        qualification: "",
+      },
+    ],
+    certificates: [] as File[],
+    description: "",
+  });
 
   useEffect(() => {
     const data = getFormData();
-    if (data.education && data.education.length > 0) {
-      setInstitutions(data.education);
+    if (data.education) {
+      if (Array.isArray(data.education)) {
+        // Backward compatibility if it was just an array before
+        setEducationData((prev) => ({ ...prev, institutions: data.education }));
+      } else {
+        setEducationData(data.education);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -38,36 +47,43 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
     field: keyof Institution,
     value: string,
   ) => {
-    const updated = [...institutions];
+    const updated = [...educationData.institutions];
     updated[index][field] = value;
-    setInstitutions(updated);
+    setEducationData((p) => ({ ...p, institutions: updated }));
   };
 
   const addInstitution = () => {
-    setInstitutions([
-      ...institutions,
-      {
-        institution: "",
-        from: "",
-        to: "",
-        qualification: "",
-      },
-    ]);
+    setEducationData((p) => ({
+      ...p,
+      institutions: [
+        ...p.institutions,
+        {
+          institution: "",
+          from: "",
+          to: "",
+          qualification: "",
+        },
+      ],
+    }));
   };
 
   const removeInstitution = (index: number) => {
-    setInstitutions((prev) => prev.filter((_, i) => i !== index));
+    setEducationData((p) => ({
+      ...p,
+      institutions: p.institutions.filter((_, i) => i !== index),
+    }));
   };
 
   const handleNext = () => {
-    updateFormData("education", institutions);
+    updateFormData("education", educationData);
     goToNext();
   };
 
   const handlePrev = () => {
-    updateFormData("education", institutions);
+    updateFormData("education", educationData);
     goToPrev();
   };
+
 
   return (
     <div className="py-8 px-4 font-inter">
@@ -82,13 +98,13 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             recent.
           </p>
 
-          {institutions.map((inst, index) => (
+          {educationData.institutions.map((inst, index) => (
             <div
               key={index}
               className="border border-gray-300 rounded-lg p-5 mb-6 relative"
             >
               {/* Remove Button */}
-              {institutions.length > 1 && (
+              {educationData.institutions.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeInstitution(index)}
@@ -202,9 +218,19 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             </label>
             <input
               type="file"
+              multiple
               accept=".pdf,.jpg,.png"
+              onChange={(e) => {
+                const files = e.target.files ? Array.from(e.target.files) : [];
+                setEducationData((p) => ({ ...p, certificates: files }));
+              }}
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
             />
+            {educationData.certificates.length > 0 && (
+              <div className="mt-2 text-sm text-gray-600">
+                {educationData.certificates.length} file(s) selected
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
               Upload PDF, JPG, or PNG files
             </p>
@@ -217,6 +243,10 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             <textarea
               rows={4}
               placeholder="DESCRIBE YOUR PROFESSIONAL CERTIFICATES"
+              value={educationData.description}
+              onChange={(e) =>
+                setEducationData((p) => ({ ...p, description: e.target.value }))
+              }
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm
                          focus:outline-none focus:ring-1 focus:ring-[#D4A34A] focus:border-[#D4A34A]"
             />
@@ -242,7 +272,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
 
         {/* Save */}
         <button
-          onClick={() => updateFormData("education", institutions)}
+          onClick={() => updateFormData("education", educationData)}
           className="flex items-center justify-center gap-2
                w-full sm:w-auto
                px-5 py-2 border border-[#0B2545]
@@ -262,6 +292,7 @@ const Education = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
         >
           Next <ArrowRight />
         </button>
+
       </div>
     </div>
   );

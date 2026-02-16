@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useAdmissionContext } from "../context/AdmissionContext";
 
 interface Institution {
-  institutionName: string;
+  institution: string;
   from: string;
   to: string;
   qualification: string;
@@ -15,23 +16,28 @@ interface EducationQualificationModalProps {
 export default function EducationQualificationModal({
   onClose,
 }: EducationQualificationModalProps) {
-  const [institutions, setInstitutions] = useState<Institution[]>([
-    { institutionName: "", from: "", to: "", qualification: "" },
-  ]);
-
-  const [, setCertificates] = useState<File | null>(null);
-  const [certificateDescription, setCertificateDescription] = useState("");
-
+  const { formData, updateFormData } = useAdmissionContext();
+  const [eduData, setEduData] = useState(formData.education || {
+    institutions: [{ institution: "", from: "", to: "", qualification: "" }],
+    certificates: [] as File[],
+    description: "",
+  });
 
   const addInstitution = () => {
-    setInstitutions((prev) => [
+    setEduData((prev: any) => ({
       ...prev,
-      { institutionName: "", from: "", to: "", qualification: "" },
-    ]);
+      institutions: [
+        ...prev.institutions,
+        { institution: "", from: "", to: "", qualification: "" },
+      ],
+    }));
   };
 
   const removeInstitution = (index: number) => {
-    setInstitutions((prev) => prev.filter((_, i) => i !== index));
+    setEduData((prev: any) => ({
+      ...prev,
+      institutions: prev.institutions.filter((_: any, i: number) => i !== index),
+    }));
   };
 
   const handleInstitutionChange = (
@@ -39,9 +45,17 @@ export default function EducationQualificationModal({
     field: keyof Institution,
     value: string
   ) => {
-    setInstitutions((prev) =>
-      prev.map((inst, i) => (i === index ? { ...inst, [field]: value } : inst))
-    );
+    setEduData((prev: any) => ({
+      ...prev,
+      institutions: prev.institutions.map((inst: any, i: number) =>
+        i === index ? { ...inst, [field]: value } : inst
+      ),
+    }));
+  };
+
+  const handleSave = () => {
+    updateFormData("education", eduData);
+    onClose();
   };
 
   return (
@@ -54,11 +68,11 @@ export default function EducationQualificationModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 text-[#0B2545]">
           <h2 className="text-lg font-semibold">
             Edit Education Qualification
           </h2>
-          <button onClick={onClose} className="cursor-pointer">
+          <button onClick={onClose} className="cursor-pointer hover:text-red-500 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -66,16 +80,16 @@ export default function EducationQualificationModal({
         <div className="space-y-8">
           {/* ================= EDUCATIONAL QUALIFICATIONS ================= */}
           <div className="border border-gray-300 rounded-lg p-6">
-            {institutions.map((inst, index) => (
+            {eduData.institutions.map((inst: any, index: number) => (
               <div
                 key={index}
                 className="border border-gray-300 rounded-lg p-5 mb-6 relative"
               >
-                {institutions.length > 1 && (
+                {eduData.institutions.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeInstitution(index)}
-                    className="absolute top-4 right-4 text-red-500"
+                    className="absolute top-4 right-4 text-red-500 hover:text-red-700"
                   >
                     <X size={18} />
                   </button>
@@ -86,16 +100,16 @@ export default function EducationQualificationModal({
                     Institution Name <span className="text-red-500">*</span>
                   </label>
                   <input
-                    value={inst.institutionName}
+                    value={inst.institution}
                     placeholder="INSTITUTION NAME"
                     onChange={(e) =>
                       handleInstitutionChange(
                         index,
-                        "institutionName",
+                        "institution",
                         e.target.value
                       )
                     }
-                    className="w-full border border-gray-300 px-3 py-2 rounded-md"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:border-[#D4A34A] outline-none"
                   />
                 </div>
 
@@ -110,7 +124,7 @@ export default function EducationQualificationModal({
                       onChange={(e) =>
                         handleInstitutionChange(index, "from", e.target.value)
                       }
-                      className="border border-gray-300 px-3 py-2 rounded-md w-full"
+                      className="border border-gray-300 px-3 py-2 rounded-md w-full focus:border-[#D4A34A] outline-none"
                     />
                   </div>
 
@@ -124,7 +138,7 @@ export default function EducationQualificationModal({
                       onChange={(e) =>
                         handleInstitutionChange(index, "to", e.target.value)
                       }
-                      className="border border-gray-300 px-3 py-2 rounded-md w-full"
+                      className="border border-gray-300 px-3 py-2 rounded-md w-full focus:border-[#D4A34A] outline-none"
                     />
                   </div>
                 </div>
@@ -143,7 +157,7 @@ export default function EducationQualificationModal({
                         e.target.value
                       )
                     }
-                    className="w-full border border-gray-300 px-3 py-2 rounded-md"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:border-[#D4A34A] outline-none"
                     placeholder="Qualification Obtained"
                   />
                 </div>
@@ -152,7 +166,7 @@ export default function EducationQualificationModal({
 
             <button
               onClick={addInstitution}
-              className="bg-[#0B2545] text-white px-4 py-2 rounded-md cursor-pointer text-sm hover:opacity-90"
+              className="bg-[#0B2545] text-white px-4 py-2 rounded-md cursor-pointer text-sm hover:opacity-90 transition-opacity"
             >
               + Add Another Institution
             </button>
@@ -166,10 +180,19 @@ export default function EducationQualificationModal({
               </label>
               <input
                 type="file"
+                multiple
                 accept=".pdf,.jpg,.png"
-                onChange={(e) => setCertificates(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const files = e.target.files ? Array.from(e.target.files) : [];
+                  setEduData((p: any) => ({ ...p, certificates: files }));
+                }}
                 className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
               />
+              {eduData.certificates.length > 0 && (
+                <div className="mt-2 text-sm text-gray-600">
+                  {eduData.certificates.length} file(s) selected
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 Upload PDF, JPG, or PNG files
               </p>
@@ -181,19 +204,23 @@ export default function EducationQualificationModal({
               </label>
               <textarea
                 rows={4}
-                value={certificateDescription}
-                onChange={(e) => setCertificateDescription(e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-md"
+                value={eduData.description}
+                onChange={(e) => setEduData((p: any) => ({ ...p, description: e.target.value }))}
+                className="w-full border border-gray-300 px-3 py-2 rounded-md focus:border-[#D4A34A] outline-none"
                 placeholder="Certificate description (optional)"
               />
             </div>
           </div>
         </div>
 
-        <button className="mt-6 w-full bg-[#D4A34A] text-white py-2 rounded-lg">
-          Save Documents
+        <button
+          onClick={handleSave}
+          className="mt-6 w-full bg-[#D4A34A] text-[#0B2545] p-3 rounded-lg font-bold font-inter cursor-pointer hover:bg-[#C09340] transition-colors"
+        >
+          Save Changes
         </button>
       </div>
     </div>
   );
 }
+

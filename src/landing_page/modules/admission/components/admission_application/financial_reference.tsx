@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionContext } from "../../context/AdmissionContext";
@@ -16,7 +17,6 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
   const [formState, setFormState] = useState({
     financeInfo: "",
     healthInfo: "",
-    description: "",
     academicReferee: "",
     academicProfession: "",
     academicInstitution: "",
@@ -150,14 +150,28 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="Enter full name" />
+              <input
+                className={inputBase}
+                placeholder="Enter full name"
+                value={formState.academicReferee}
+                onChange={(e) =>
+                  handleInputChange("academicReferee", e.target.value)
+                }
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Profession <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="e.g Lecturer" />
+              <input
+                className={inputBase}
+                placeholder="e.g Lecturer"
+                value={formState.academicProfession}
+                onChange={(e) =>
+                  handleInputChange("academicProfession", e.target.value)
+                }
+              />
             </div>
 
             <div className="md:col-span-2">
@@ -168,6 +182,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <input
                 className={inputBase}
                 placeholder="Enter institution or organization"
+                value={formState.academicInstitution}
+                onChange={(e) =>
+                  handleInputChange("academicInstitution", e.target.value)
+                }
               />
             </div>
 
@@ -179,6 +197,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                 rows={3}
                 className={`${inputBase} resize-none`}
                 placeholder="Enter full address"
+                value={formState.academicAddress}
+                onChange={(e) =>
+                  handleInputChange("academicAddress", e.target.value)
+                }
               />
             </div>
 
@@ -193,8 +215,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                 maxLength={11}
                 placeholder="08012345678"
                 className={inputBase}
+                value={formState.academicPhone}
                 onChange={(e) => {
-                  e.target.value = e.target.value.replace(/\D/g, "");
+                  const val = e.target.value.replace(/\D/g, "");
+                  handleInputChange("academicPhone", val);
                 }}
               />
             </div>
@@ -203,7 +227,14 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="example@email.com" />
+              <input
+                className={inputBase}
+                placeholder="example@email.com"
+                value={formState.academicEmail}
+                onChange={(e) =>
+                  handleInputChange("academicEmail", e.target.value)
+                }
+              />
             </div>
           </div>
         </div>
@@ -217,14 +248,28 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="Enter full name" />
+              <input
+                className={inputBase}
+                placeholder="Enter full name"
+                value={formState.clergyReferee}
+                onChange={(e) =>
+                  handleInputChange("clergyReferee", e.target.value)
+                }
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Position <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="e.g Pastor" />
+              <input
+                className={inputBase}
+                placeholder="e.g Pastor"
+                value={formState.clergyPosition}
+                onChange={(e) =>
+                  handleInputChange("clergyPosition", e.target.value)
+                }
+              />
             </div>
 
             <div className="md:col-span-2">
@@ -234,6 +279,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <input
                 className={inputBase}
                 placeholder="Enter church or ministry name"
+                value={formState.clergyChurch}
+                onChange={(e) =>
+                  handleInputChange("clergyChurch", e.target.value)
+                }
               />
             </div>
 
@@ -245,6 +294,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                 rows={3}
                 className={`${inputBase} resize-none`}
                 placeholder="Enter full address"
+                value={formState.clergyAddress}
+                onChange={(e) =>
+                  handleInputChange("clergyAddress", e.target.value)
+                }
               />
             </div>
 
@@ -259,8 +312,10 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
                 maxLength={11}
                 placeholder="08012345678"
                 className={inputBase}
+                value={formState.clergyPhone}
                 onChange={(e) => {
-                  e.target.value = e.target.value.replace(/\D/g, "");
+                  const val = e.target.value.replace(/\D/g, "");
+                  handleInputChange("clergyPhone", val);
                 }}
               />
             </div>
@@ -269,10 +324,16 @@ const FinancialReference = ({ goToNext, goToPrev }: Props) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address <span className="text-red-500">*</span>
               </label>
-              <input className={inputBase} placeholder="example@email.com" />
+              <input
+                className={inputBase}
+                placeholder="example@email.com"
+                value={formState.clergyEmail}
+                onChange={(e) => handleInputChange("clergyEmail", e.target.value)}
+              />
             </div>
           </div>
         </div>
+
       </div>
 
       {/* ================= DECLARATION ================= */}

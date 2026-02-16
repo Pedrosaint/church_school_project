@@ -4,6 +4,7 @@ import { Eye, Trash2, User } from "lucide-react";
 import ViewModal from "../modal/view.modal";
 import DeleteModal from "../modal/delete.modal";
 import { EmptyState } from "../../../../../general/ui/empty_state";
+import { getMediaUrl } from "../../../../../utils/media";
 import {
   useGetTestimoniesQuery,
   useDeleteTestimonyMutation,
@@ -80,9 +81,8 @@ export default function TestimoniesReviews() {
       <div className="flex items-center justify-center p-1 rounded-full gap-3 mb-4 bg-gray-200 w-72">
         <button
           onClick={() => setActiveTab("pending")}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition ${
-            activeTab === "pending" ? "bg-white shadow" : "text-gray-600"
-          }`}
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition ${activeTab === "pending" ? "bg-white shadow" : "text-gray-600"
+            }`}
         >
           <span className="text-sm font-medium">Pending</span>
           <span className="bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -92,9 +92,8 @@ export default function TestimoniesReviews() {
 
         <button
           onClick={() => setActiveTab("approved")}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition ${
-            activeTab === "approved" ? "bg-white shadow" : "text-gray-600"
-          }`}
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-full transition ${activeTab === "approved" ? "bg-white shadow" : "text-gray-600"
+            }`}
         >
           <span className="text-sm font-medium">Approved</span>
           <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -122,7 +121,7 @@ export default function TestimoniesReviews() {
                   <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-700 rounded-full flex items-center justify-center overflow-hidden">
                     {testimony.photoUrl ? (
                       <img
-                        src={testimony.photoUrl}
+                        src={getMediaUrl(testimony.photoUrl)}
                         alt={testimony.name}
                         className="w-full h-full object-cover"
                       />

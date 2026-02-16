@@ -27,7 +27,7 @@ const Footer = () => {
             <p className="flex items-start gap-3 text-gray-400">
               <MapPin size={22} className="text-[#D4A34A] shrink-0" />
               <span>
-                13–5 WAGGOM Avenue, Off Agalaba Road, Osiomma, Aba, Abia State
+                3–5 WAGGOM Avenue, Off Agalaba Road, Osiomma, Aba, Abia State
               </span>
             </p>
 

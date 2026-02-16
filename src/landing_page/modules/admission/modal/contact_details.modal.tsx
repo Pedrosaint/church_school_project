@@ -1,4 +1,6 @@
 import { X } from "lucide-react";
+import { useAdmissionContext } from "../context/AdmissionContext";
+import { useState } from "react";
 
 interface ContactDetailsModalProps {
   onClose: () => void;
@@ -7,20 +9,46 @@ interface ContactDetailsModalProps {
 export default function ContactDetailsModal({
   onClose,
 }: ContactDetailsModalProps) {
+  const { formData, updateFormData } = useAdmissionContext();
+  const [form, setForm] = useState(formData.contactDetails || {
+    presentAddress: "",
+    phone: "",
+    email: "",
+    permanentAddress: "",
+    postalAddress: "",
+    nationality: "",
+    nativeLanguage: "",
+    placeDiffNationality: false,
+    maritalStatus: "",
+    religion: "",
+    denomination: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((p: any) => ({ ...p, [name]: value }));
+  };
+
+  const handleSave = () => {
+    updateFormData("contactDetails", form);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-2">
       <div className="bg-white w-full max-w-3xl p-6 rounded-xl shadow-lg">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 text-[#0B2545]">
           <h2 className="text-lg font-semibold">
             Edit Contact & Background Details
           </h2>
-          <button onClick={onClose} className="cursor-pointer">
+          <button onClick={onClose} className="cursor-pointer hover:text-red-500 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-
-        <div className="overflow-y-auto h-full max-h-[700px]">
+        <div className="overflow-y-auto h-full max-h-[70vh] pr-4 space-y-6">
           {/* Present Address */}
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -29,8 +57,10 @@ export default function ContactDetailsModal({
             </label>
             <textarea
               name="presentAddress"
+              value={form.presentAddress}
+              onChange={handleChange}
               placeholder="PRESENT RESIDENTIAL ADDRESS"
-              className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+              className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
             />
           </div>
 
@@ -42,8 +72,10 @@ export default function ContactDetailsModal({
               </label>
               <input
                 name="phone"
+                value={form.phone}
+                onChange={handleChange}
                 placeholder="+234 XXX XXX XXXX"
-                className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
               />
             </div>
 
@@ -53,8 +85,10 @@ export default function ContactDetailsModal({
               </label>
               <input
                 name="email"
+                value={form.email}
+                onChange={handleChange}
                 placeholder="email@example.com"
-                className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
               />
             </div>
           </div>
@@ -67,8 +101,10 @@ export default function ContactDetailsModal({
             </label>
             <textarea
               name="permanentAddress"
+              value={form.permanentAddress}
+              onChange={handleChange}
               placeholder="PERMANENT HOME ADDRESS"
-              className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+              className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
             />
           </div>
 
@@ -79,8 +115,10 @@ export default function ContactDetailsModal({
             </label>
             <textarea
               name="postalAddress"
+              value={form.postalAddress}
+              onChange={handleChange}
               placeholder="POSTAL ADDRESS"
-              className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+              className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
             />
           </div>
 
@@ -92,8 +130,10 @@ export default function ContactDetailsModal({
               </label>
               <input
                 name="nationality"
+                value={form.nationality}
+                onChange={handleChange}
                 placeholder="NATIONALITY"
-                className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
               />
             </div>
 
@@ -103,8 +143,10 @@ export default function ContactDetailsModal({
               </label>
               <input
                 name="nativeLanguage"
+                value={form.nativeLanguage}
+                onChange={handleChange}
                 placeholder="NATIVE LANGUAGE"
-                className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
               />
             </div>
           </div>
@@ -115,20 +157,22 @@ export default function ContactDetailsModal({
               Is Place of Birth Different from Nationality?
             </label>
             <div className="flex gap-6">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
-                  name="placeOfBirthDiff"
-                  value="Yes"
+                  name="placeDiffNationality"
+                  checked={form.placeDiffNationality === true}
+                  onChange={() => setForm((p: any) => ({ ...p, placeDiffNationality: true }))}
                   className="custom-radio"
                 />
                 Yes
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
-                  name="placeOfBirthDiff"
-                  value="No"
+                  name="placeDiffNationality"
+                  checked={form.placeDiffNationality === false}
+                  onChange={() => setForm((p: any) => ({ ...p, placeDiffNationality: false }))}
                   className="custom-radio"
                 />
                 No
@@ -144,12 +188,14 @@ export default function ContactDetailsModal({
               </label>
               <div className="grid grid-cols-1 gap-4 text-sm">
                 {["Single", "Married", "Widowed", "Divorced"].map((status) => (
-                  <label key={status} className="flex items-center gap-2">
+                  <label key={status} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="maritalStatus"
                       value={status}
-                      className="custom-radio "
+                      checked={form.maritalStatus === status}
+                      onChange={handleChange}
+                      className="custom-radio"
                     />
                     {status}
                   </label>
@@ -165,8 +211,10 @@ export default function ContactDetailsModal({
                 </label>
                 <input
                   name="religion"
+                  value={form.religion}
+                  onChange={handleChange}
                   placeholder="RELIGION"
-                  className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                  className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
                 />
               </div>
 
@@ -176,13 +224,18 @@ export default function ContactDetailsModal({
                 </label>
                 <input
                   name="denomination"
+                  value={form.denomination}
+                  onChange={handleChange}
                   placeholder="DENOMINATION"
-                  className="w-full border border-gray-300 rounded-lg p-3 outline-none"
+                  className="w-full border border-gray-300 rounded-lg p-3 outline-none focus:border-[#D4A34A]"
                 />
               </div>
             </div>
           </div>
-          <button className="mt-6 w-full bg-[#D4A34A] text-white p-2 rounded-lg font-inter cursor-pointer">
+          <button
+            onClick={handleSave}
+            className="mt-6 w-full bg-[#D4A34A] text-[#0B2545] p-3 rounded-lg font-bold font-inter cursor-pointer hover:bg-[#C09340] transition-colors"
+          >
             Save Changes
           </button>
         </div>
@@ -190,3 +243,4 @@ export default function ContactDetailsModal({
     </div>
   );
 }
+

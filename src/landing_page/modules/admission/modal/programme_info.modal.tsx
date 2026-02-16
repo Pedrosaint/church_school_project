@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
+import { useAdmissionContext } from "../context/AdmissionContext";
+import { getMediaUrl } from "../../../../utils/media";
 
 interface ProgrammeInfoModalProps {
   onClose: () => void;
@@ -8,12 +11,18 @@ interface ProgrammeInfoModalProps {
 export default function ProgrammeInfoModal({
   onClose,
 }: ProgrammeInfoModalProps) {
-  const [form, setForm] = useState({
+  const { formData, updateFormData } = useAdmissionContext();
+  const [form, setForm] = useState(formData.programmeInfo || {
     programmeLevel: "",
     programmeChoice: "",
     passport1: null as File | null,
     passport2: null as File | null,
   });
+
+  const handleSave = () => {
+    updateFormData("programmeInfo", form);
+    onClose();
+  };
 
   // Small helper to safely preview a File/Blob or remote file object
   function FilePreview({ file }: { file: any }) {
@@ -41,8 +50,7 @@ export default function ProgrammeInfoModal({
       }
 
       if (file && typeof file === "object" && file.fileUrl) {
-        const base = import.meta.env.VITE_API_BASE_URL ?? "";
-        setUrl(base + file.fileUrl);
+        setUrl(getMediaUrl(file.fileUrl));
         return;
       }
 
@@ -71,14 +79,14 @@ export default function ProgrammeInfoModal({
       {/* Modal Container */}
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl p-6 relative font-inter overflow-y-auto max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-bold text-slate-800">
+        <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4 text-[#0B2545]">
+          <h2 className="text-xl font-bold">
             Programme Information<span className="text-red-500">*</span>
           </h2>
 
           <button
             onClick={onClose}
-            className="text-gray-400 cursor-pointer transition"
+            className="text-gray-400 cursor-pointer transition hover:text-red-500"
           >
             <X size={20} />
           </button>
@@ -102,7 +110,7 @@ export default function ProgrammeInfoModal({
                   value={level}
                   checked={form.programmeLevel === level}
                   onChange={() =>
-                    setForm((p) => ({ ...p, programmeLevel: level }))
+                    setForm((p: any) => ({ ...p, programmeLevel: level }))
                   }
                   className="accent-[#0B2545]"
                 />
@@ -122,9 +130,9 @@ export default function ProgrammeInfoModal({
             <select
               value={form.programmeChoice}
               onChange={(e) =>
-                setForm((p) => ({ ...p, programmeChoice: e.target.value }))
+                setForm((p: any) => ({ ...p, programmeChoice: e.target.value }))
               }
-              className="appearance-none border border-gray-200 p-3 rounded-xl w-full outline-none text-slate-600"
+              className="appearance-none border border-gray-200 p-3 rounded-xl w-full outline-none text-slate-600 focus:border-[#D4A34A]"
             >
               <option value="">Select programme</option>
               <option value="Theology">Theology</option>
@@ -167,7 +175,7 @@ export default function ProgrammeInfoModal({
                         accept="image/png, image/jpeg"
                         hidden
                         onChange={(e) =>
-                          setForm((p) => ({
+                          setForm((p: any) => ({
                             ...p,
                             [`passport${num}`]: e.target.files?.[0] || null,
                           }))
@@ -196,7 +204,7 @@ export default function ProgrammeInfoModal({
                       <button
                         type="button"
                         onClick={() =>
-                          setForm((p) => ({
+                          setForm((p: any) => ({
                             ...p,
                             [`passport${num}`]: null,
                           }))
@@ -213,10 +221,15 @@ export default function ProgrammeInfoModal({
           </div>
         </div>
 
-        <button className="mt-6 w-full bg-[#D4A34A] text-white p-2 rounded-lg font-inter cursor-pointer">
+
+        <button
+          onClick={handleSave}
+          className="mt-6 w-full bg-[#D4A34A] text-[#0B2545] p-3 rounded-lg font-bold font-inter cursor-pointer hover:bg-[#C09340] transition-colors"
+        >
           Save Changes
         </button>
       </div>
     </div>
   );
 }
+

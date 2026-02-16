@@ -1,23 +1,27 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 
-const levelOptions = ["All Levels", "Undergraduate", "Masters", "Certificate"];
+interface AcademicSearchProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedLevel: string;
+  setSelectedLevel: (level: string) => void;
+  selectedDept: string;
+  setSelectedDept: (dept: string) => void;
+}
 
-const departmentOptions = [
-  "All Departments",
-  "Theology",
-  "Religion & Religious Studies",
-  "Christian Education & Psychology",
-  "Library & Information Studies",
-  "Law & English",
-];
+import { levelOptions, departmentOptions } from "../../../../general/context/SearchOptions";
 
-const AcademicSearch = () => {
+const AcademicSearch = ({
+  searchQuery,
+  setSearchQuery,
+  selectedLevel,
+  setSelectedLevel,
+  selectedDept,
+  setSelectedDept,
+}: AcademicSearchProps) => {
   const [levelOpen, setLevelOpen] = useState(false);
-  const [selectedLevel, setSelectedLevel] = useState("All Levels");
-
   const [deptOpen, setDeptOpen] = useState(false);
-  const [selectedDept, setSelectedDept] = useState("All Departments");
 
   return (
     <div className="bg-white py-8 px-4 mt-32 md:mt-39">
@@ -29,6 +33,8 @@ const AcademicSearch = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search courses, programs or keywords..."
                 className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D4A34A] focus:border-transparent text-sm"
               />

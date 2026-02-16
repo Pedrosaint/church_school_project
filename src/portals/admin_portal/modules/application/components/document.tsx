@@ -1,13 +1,12 @@
 import { Eye, Download, Upload } from "lucide-react";
+import { getMediaUrl } from "../../../../../utils/media";
 
-type DocStatus = "Verified" | "Issue";
+// type DocStatus = "Verified" | "Issue";
 
-const statusStyles: Record<DocStatus, string> = {
-  Verified: "bg-green-100 text-green-700",
-  Issue: "bg-yellow-100 text-yellow-700",
-};
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const statusStyles: Record<DocStatus, string> = {
+//   Verified: "bg-green-100 text-green-700",
+//   Issue: "bg-yellow-100 text-yellow-700",
+// };
 
 const UploadedDocuments = ({
   certificates = [],
@@ -51,14 +50,14 @@ const UploadedDocuments = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <span
+            {/* <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles["Verified"]}`}
             >
               Verified
-            </span>
+            </span> */}
 
             <a
-              href={`${BASE_URL}${doc.fileUrl}`}
+              href={getMediaUrl(doc.fileUrl)}
               target="_blank"
               rel="noreferrer"
               className="text-gray-500"
@@ -67,7 +66,7 @@ const UploadedDocuments = ({
             </a>
 
             <a
-              href={`${BASE_URL}${doc.fileUrl}`}
+              href={getMediaUrl(doc.fileUrl)}
               download
               className="text-gray-500"
             >

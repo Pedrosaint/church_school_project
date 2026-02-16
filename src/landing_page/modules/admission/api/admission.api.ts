@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface AdmissionFormData {
@@ -129,11 +130,34 @@ export const admissionApi = createApi({
   }),
   endpoints: (builder) => ({
     submitAdmission: builder.mutation<AdmissionResponse, FormData>({
-      query: (formData) => ({
-        url: "/admissions",
-        method: "POST",
-        body: formData,
-      }),
+      queryFn: async (payload) => {
+        try {
+          const response = await fetch(`${baseURL}/admissions`, {
+            method: "POST",
+            body: payload,
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            return {
+              error: {
+                status: response.status,
+                data: result
+              }
+            };
+          }
+
+          return { data: result as AdmissionResponse };
+        } catch (err: any) {
+          return {
+            error: {
+              status: "FETCH_ERROR",
+              error: err.message || String(err)
+            }
+          };
+        }
+      },
     }),
     getAdmissions: builder.query<AdmissionData[], void>({
       query: () => ({

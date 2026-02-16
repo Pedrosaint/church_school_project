@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionContext } from "../../context/AdmissionContext";
@@ -163,8 +164,10 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
           <label className="flex items-center gap-2">
             <input
               type="radio"
-              name="placeOfBirthDiff"
-              value="Yes"
+              name="placeDiffNationality"
+              value="true"
+              checked={form.placeDiffNationality === true}
+              onChange={() => setForm(p => ({ ...p, placeDiffNationality: true }))}
               className="custom-radio"
             />
             Yes
@@ -172,8 +175,10 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
           <label className="flex items-center gap-2">
             <input
               type="radio"
-              name="placeOfBirthDiff"
-              value="No"
+              name="placeDiffNationality"
+              value="false"
+              checked={form.placeDiffNationality === false}
+              onChange={() => setForm(p => ({ ...p, placeDiffNationality: false }))}
               className="custom-radio"
             />
             No
@@ -194,6 +199,8 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
                   type="radio"
                   name="maritalStatus"
                   value={status}
+                  checked={form.maritalStatus === status}
+                  onChange={handleChange}
                   className="custom-radio"
                 />
                 {status}
@@ -201,6 +208,7 @@ const ContactDetails = ({ goToNext, goToPrev }: AcademicHistoryProps) => {
             ))}
           </div>
         </div>
+
 
         {/* Religion & Denomination */}
         <div className="flex-1 flex flex-col gap-4">

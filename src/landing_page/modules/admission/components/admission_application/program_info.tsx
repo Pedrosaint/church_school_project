@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { Clock, ChevronDown, Save, X } from "lucide-react";
 import { useAdmissionContext } from "../../context/AdmissionContext";
+import { getMediaUrl } from "../../../../../utils/media";
 
 // Small helper to safely preview a File/Blob or remote file object
 function FilePreview({ file }: { file: any }) {
@@ -31,8 +34,7 @@ function FilePreview({ file }: { file: any }) {
 
     // If it's an object returned from server with fileUrl property
     if (file && typeof file === "object" && file.fileUrl) {
-      const base = import.meta.env.VITE_API_BASE_URL ?? "";
-      setUrl(base + file.fileUrl);
+      setUrl(getMediaUrl(file.fileUrl));
       return;
     }
 
