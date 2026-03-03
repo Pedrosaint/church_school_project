@@ -18,6 +18,30 @@ interface LoginResponse {
   success: boolean;
 }
 
+export interface StudentsLoginRequest {
+  email: string;
+}
+
+export interface StudentsLoginResponse {
+  success: boolean
+  message: string
+  data: Data
+}
+
+export interface Data {
+  token: string
+  admission: Admission
+}
+
+export interface Admission {
+  id: string
+  surname: string
+  firstname: string
+  email: string
+  status: string
+}
+
+
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
@@ -38,9 +62,9 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
-    studentLogin: builder.mutation<LoginResponse, LoginRequest>({
+    studentLogin: builder.mutation<StudentsLoginResponse, StudentsLoginRequest>({
       query: (credentials) => ({
-        url: "/student/login",
+        url: "/students/login",
         method: "POST",
         body: credentials,
       }),

@@ -6,6 +6,7 @@ import { eventApi } from "../portals/admin_portal/modules/events/api/event.api";
 import { testimoniesApi } from "../portals/admin_portal/modules/testimonies/api/testimonies.api";
 import { admissionApi } from "../landing_page/modules/admission/api/admission.api";
 import { applicationApi } from "../portals/admin_portal/modules/application/api/application.api";
+import { studentNewsApi } from "../portals/student_portal/modules/dashboard/api/dashboard.api";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     [testimoniesApi.reducerPath]: testimoniesApi.reducer,
     [admissionApi.reducerPath]: admissionApi.reducer,
     [applicationApi.reducerPath]: applicationApi.reducer,
+    [studentNewsApi.reducerPath]: studentNewsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -24,7 +26,8 @@ export const store = configureStore({
       .concat(eventApi.middleware)
       .concat(testimoniesApi.middleware)
       .concat(admissionApi.middleware)
-      .concat(applicationApi.middleware),
+      .concat(applicationApi.middleware)
+      .concat(studentNewsApi.middleware),
 });
 
 // Types for TypeScript apps

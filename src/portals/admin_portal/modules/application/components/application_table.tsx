@@ -2,6 +2,7 @@ import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetApplicationsQuery } from "../api/application.api";
 import { useEffect, useState } from "react";
+import { getSecureItem, setSecureItem } from "../../../../../utils/secureStorage";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
@@ -39,12 +40,13 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
 
   const STORAGE_KEY = "admission_applications";
 
-  // Restore saved pagination + filter state from localStorage
+  // Restore saved pagination + filter state from secureStorage
   const restoreState = () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = getSecureItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
+        // secureStorage might return parsed object if set with object, or string.
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
         return {
           page: typeof parsed.page === "number" ? parsed.page : 1,
           pageSize: typeof parsed.pageSize === "number" ? parsed.pageSize : 10,
@@ -63,11 +65,11 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
   const [page, setPage] = useState<number>(initialPage);
   const [pageSize, setPageSize] = useState<number>(initialPageSize);
 
-  // Persist pagination and current status to localStorage
+  // Persist pagination and current status to secureStorage
   useEffect(() => {
     try {
       const toSave = { page, pageSize, status };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      setSecureItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch {
       // ignore
     }
@@ -92,17 +94,19 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
     <div className="rounded-xl border border-gray-200 bg-white p-6">
       <h2 className="font-semibold mb-4">Applications ({total})</h2>
 
+      {/* Added overflow-x-auto container for horizontal scrolling */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm table-fixed">
+        {/* Added min-width to ensure table doesn't shrink too much */}
+        <table className="min-w-[1200px] w-full text-sm">
           <thead className="border-b border-gray-200 text-gray-500 whitespace-nowrap">
             <tr className="text-left">
               <th className="py-3 px-4 w-48">Application ID</th>
               <th className="px-4">Applicant Name</th>
+              <th className="px-4">Email</th>
               <th className="px-4">Programme Level</th>
               <th className="px-4">Programme Choice</th>
               <th className="px-4">Submission Date</th>
               <th className="px-4">Status</th>
-              <th className="px-4">Assigned Reviewer</th>
               <th className="px-4">Actions</th>
             </tr>
           </thead>
@@ -152,6 +156,7 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
                 <td className="px-4">
                   {`${row.firstname ?? ""} ${row.surname ?? ""}`.trim()}
                 </td>
+                <td className="px-4 truncate overflow-hidden">{row.email}</td>
                 <td className="px-4">{row.programmeLevel}</td>
                 <td className="px-4">{row.programmeChoice}</td>
                 <td className="px-4">
@@ -166,12 +171,11 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
                     status={
                       row.status
                         ? row.status.charAt(0).toUpperCase() +
-                          row.status.slice(1)
+                        row.status.slice(1)
                         : "Pending"
                     }
                   />
                 </td>
-                <td className="px-4">-</td>
                 <td className="px-4">
                   <button
                     onClick={() =>
@@ -186,52 +190,52 @@ const ApplicationsTable = ({ status }: { status?: string }) => {
             ))}
           </tbody>
         </table>
+      </div>
 
-        {/* Pagination Controls */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            {total === 0 ? (
-              ""
-            ) : (
-              <span>
-                Showing <strong>{startIndex + 1}</strong> -{" "}
-                <strong>{endIndex}</strong> of <strong>{total}</strong>
-              </span>
-            )}
-          </div>
+      {/* Pagination Controls - Moved outside the scrollable container */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          {total === 0 ? (
+            ""
+          ) : (
+            <span>
+              Showing <strong>{startIndex + 1}</strong> -{" "}
+              <strong>{endIndex}</strong> of <strong>{total}</strong>
+            </span>
+          )}
+        </div>
 
-          <div className="flex items-center gap-3">
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="rounded border-gray-200 px-3 py-1 text-sm"
+        <div className="flex items-center gap-3">
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="rounded border-gray-200 px-3 py-1 text-sm"
+          >
+            <option value={10}>10 / page</option>
+            <option value={25}>25 / page</option>
+            <option value={50}>50 / page</option>
+          </select>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="rounded px-3 py-1 bg-white border border-gray-200 text-sm disabled:opacity-50"
             >
-              <option value={10}>10 / page</option>
-              <option value={25}>25 / page</option>
-              <option value={50}>50 / page</option>
-            </select>
+              Prev
+            </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="rounded px-3 py-1 bg-white border border-gray-200 text-sm disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              <div className="text-sm text-gray-700">
-                Page {page} of {totalPages}
-              </div>
-
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="rounded px-3 py-1 bg-white border border-gray-200 text-sm disabled:opacity-50"
-              >
-                Next
-              </button>
+            <div className="text-sm text-gray-700">
+              Page {page} of {totalPages}
             </div>
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="rounded px-3 py-1 bg-white border border-gray-200 text-sm disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

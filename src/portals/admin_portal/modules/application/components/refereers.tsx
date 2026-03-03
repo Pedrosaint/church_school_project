@@ -13,10 +13,10 @@ interface Referee {
   status?: RefStatus;
 }
 
-const statusStyles: Record<RefStatus, string> = {
-  Verified: "bg-green-100 text-green-700",
-  Pending: "bg-yellow-100 text-yellow-700",
-};
+// const statusStyles: Record<RefStatus, string> = {
+//   Verified: "bg-green-100 text-green-700",
+//   Pending: "bg-yellow-100 text-yellow-700",
+// };
 
 const Referees = ({ referees = [] }: { referees?: Referee[] }) => {
   if (!referees || referees.length === 0) {
@@ -39,11 +39,11 @@ const Referees = ({ referees = [] }: { referees?: Referee[] }) => {
               <p className="text-sm text-gray-500">{ref.role ?? "—"}</p>
             </div>
 
-            <span
+            {/* <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[(ref.status as RefStatus) ?? "Pending"]}`}
             >
               {ref.status ?? "Pending"}
-            </span>
+            </span> */}
           </div>
 
           {/* Body */}

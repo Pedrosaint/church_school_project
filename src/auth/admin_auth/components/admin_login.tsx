@@ -42,13 +42,13 @@ const AdminLogin: React.FC = () => {
       setSecureItem("token", result.data.accessToken);
 
       // Dispatch login success to Redux
-      dispatch(
-        loginSuccess({
-          role: "admin",
-          email,
-          token: result.data.accessToken,
-        }),
-      );
+  dispatch(
+    loginSuccess({
+      name: result.data?.accessToken ? "Admin User" : "Admin",
+      role: "admin",
+      token: result.data.accessToken,
+    }),
+  );
 
       navigate("/dashboard/overview");
       toast.success("Login successful!");
@@ -142,14 +142,14 @@ const AdminLogin: React.FC = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-[#D4A95E] text-white py-3 rounded-sm font-semibold hover:bg-[#D4A95E]/90 cursor-pointer transition disabled:opacity-50"
+          className="w-full bg-[#D4A95E] text-white py-3 rounded-sm font-semibold hover:bg-[#D4A95E]/90 cursor-pointer transition disabled:opacity-50 hover:scale-105"
         >
           {isLoading ? "Logging in..." : "AdminLogin"}
         </button>
       </motion.form>
 
       {/* Sign Up Link */}
-      <p className="text-sm text-gray-600 mt-6 text-center">
+      {/* <p className="text-sm text-gray-600 mt-6 text-center">
         Don't have an account?{" "}
         <button
           onClick={() => navigate("signup")}
@@ -157,7 +157,7 @@ const AdminLogin: React.FC = () => {
         >
           Sign Up
         </button>
-      </p>
+      </p> */}
     </div>
   );
 };

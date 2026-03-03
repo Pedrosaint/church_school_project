@@ -1,5 +1,6 @@
 import { Eye, Download, Upload } from "lucide-react";
 import { getMediaUrl } from "../../../../../utils/media";
+import handlePrint from "../../../../../utils/print";
 
 // type DocStatus = "Verified" | "Issue";
 
@@ -65,13 +66,12 @@ const UploadedDocuments = ({
               <Eye className="h-4 w-4 cursor-pointer" />
             </a>
 
-            <a
-              href={getMediaUrl(doc.fileUrl)}
-              download
+            <button
+              onClick={() => handlePrint(getMediaUrl(doc.fileUrl))}
               className="text-gray-500"
             >
               <Download className="h-4 w-4 cursor-pointer" />
-            </a>
+            </button>
           </div>
         </div>
       ))}

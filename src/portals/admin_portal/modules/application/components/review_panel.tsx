@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   useApproveApplicationMutation,
   useRejectApplicationMutation,
 } from "../api/application.api";
+
+type Status = "PENDING" | "APPROVED" | "REJECTED";
 
 const ReviewPanel = ({
   id,
@@ -16,15 +19,21 @@ const ReviewPanel = ({
   const [rejectApplication, { isLoading: isRejecting }] =
     useRejectApplicationMutation();
 
+  // 🔥 Local status for instant UI update
+  const [status, setStatus] = useState<Status>(
+    (currentStatus?.toUpperCase() as Status) || "PENDING"
+  );
+
+  const isApproved = status === "APPROVED";
+  const isRejected = status === "REJECTED";
+  const isFinalized = isApproved || isRejected;
+
   const handleApprove = async () => {
-    if (!id) return;
-    if ((currentStatus ?? "").toLowerCase() === "approved") {
-      toast.error("Application is already approved");
-      return;
-    }
+    if (!id || isFinalized) return;
 
     try {
       await approveApplication(id).unwrap();
+      setStatus("APPROVED"); // 🔥 Instant UI update
       toast.success("Application approved");
     } catch (err) {
       console.error(err);
@@ -33,14 +42,11 @@ const ReviewPanel = ({
   };
 
   const handleReject = async () => {
-    if (!id) return;
-    if ((currentStatus ?? "").toLowerCase() === "rejected") {
-      toast.error("Application is already rejected");
-      return;
-    }
+    if (!id || isFinalized) return;
 
     try {
       await rejectApplication(id).unwrap();
+      setStatus("REJECTED"); // 🔥 Instant UI update
       toast.success("Application rejected");
     } catch (err) {
       console.error(err);
@@ -54,22 +60,30 @@ const ReviewPanel = ({
 
       <button
         onClick={handleApprove}
-        disabled={isApproving}
-        className="w-full rounded-xl bg-green-600 py-2 text-white font-medium cursor-pointer disabled:opacity-50"
+        disabled={isApproving || isFinalized}
+        className={`w-full rounded-xl py-2 text-white font-medium transition
+          ${isApproved ? "bg-green-400 cursor-not-allowed disabled:opacity-50" : "bg-green-600 hover:scale-105 "}
+          `}
       >
-        {isApproving ? "Approving..." : "Approve Application"}
+        {isApproved
+          ? "Approved"
+          : isApproving
+            ? "Approving..."
+            : "Approve Application"}
       </button>
 
       <button
         onClick={handleReject}
-        disabled={isRejecting}
-        className="w-full rounded-xl bg-red-600 py-2 text-white font-medium cursor-pointer disabled:opacity-50"
+        disabled={isRejecting || isFinalized}
+        className={`w-full rounded-xl py-2 text-white font-medium transition 
+          ${isRejected ? "bg-red-400 cursor-not-allowed disabled:opacity-50" : "bg-red-600 hover:scale-105 cursor-pointer"}
+         `}
       >
-        {isRejecting ? "Rejecting..." : "Reject Application"}
-      </button>
-
-      <button className="w-full rounded-xl border border-gray-200 py-2 text-sm cursor-pointer">
-        Request Clarification
+        {isRejected
+          ? "Rejected"
+          : isRejecting
+            ? "Rejecting..."
+            : "Reject Application"}
       </button>
     </div>
   );

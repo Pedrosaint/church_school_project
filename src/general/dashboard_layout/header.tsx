@@ -1,29 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Menu } from "lucide-react";
 import React from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
 
-const Header: React.FC<{ role?: string; user?: any; setMobileOpen?: any }> = ({
-  role = "student",
-  user,
-  setMobileOpen,
-}) => {
-  const displayName = user?.name ?? (role === "admin" ? "Admin" : "John Doe");
+interface HeaderProps {
+  setMobileOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-  // derive avatar initials from email local-part or name
-  const emailLocal = String(user?.email || "").split("@")[0] || "";
-  let initials = "JD";
-  if (emailLocal) {
-    const parts = emailLocal.split(/[._-]/).filter(Boolean);
-    if (parts.length >= 2) {
-      initials = (parts[0][0] + parts[1][0]).toUpperCase();
-    } else {
-      initials = emailLocal.slice(0, 2).toUpperCase();
-    }
-  } else if (user?.name) {
-    const nameParts = String(user.name).split(" ").filter(Boolean);
-    if (nameParts.length >= 2)
+const Header: React.FC<HeaderProps> = ({ setMobileOpen }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const displayName = user?.name ?? "Guest";
+  const role = user?.role ?? "";
+
+  // 🔥 Generate initials from name
+  let initials = "GU";
+
+  if (user?.name) {
+    const nameParts = user.name.split(" ").filter(Boolean);
+
+    if (nameParts.length >= 2) {
       initials = (nameParts[0][0] + nameParts[1][0]).toUpperCase();
-    else initials = String(user.name).slice(0, 2).toUpperCase();
+    } else {
+      initials = user.name.slice(0, 2).toUpperCase();
+    }
   }
 
   const today = new Date();
@@ -37,10 +37,12 @@ const Header: React.FC<{ role?: string; user?: any; setMobileOpen?: any }> = ({
   return (
     <header className="bg-white border-b border-slate-200 font-inter">
       <div className="px-4 py-4 flex items-start justify-between gap-4">
-        <button className="md:hidden p-3" onClick={() => setMobileOpen(true)}>
+        {/* Mobile Menu */}
+        <button className="md:hidden p-3" onClick={() => setMobileOpen?.(true)}>
           <Menu className="w-6 h-6 text-slate-800" />
         </button>
 
+        {/* Welcome Section */}
         <div className="flex-1">
           <h2 className="text-lg font-semibold text-slate-800">
             Welcome back, {displayName}
@@ -48,14 +50,18 @@ const Header: React.FC<{ role?: string; user?: any; setMobileOpen?: any }> = ({
           <p className="text-xs text-slate-500 mt-1">{formatted}</p>
         </div>
 
-        {/* Right: avatar */}
+        {/* Right Section */}
         <div className="flex items-center gap-3">
-          <div className="text-right hidden md:block">
-            <div className="text-sm font-medium">Waggom Admin</div>
-            <div className="text-xs text-slate-500">Admin</div>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-slate-300 overflow-hidden flex items-center justify-center">
-            {/* Replace with <img src={user.avatar} /> */}
+          {user && (
+            <div className="text-right hidden md:block">
+              <div className="text-sm font-medium capitalize">
+                {displayName}
+              </div>
+              <div className="text-xs text-slate-500 capitalize">{role}</div>
+            </div>
+          )}
+
+          <div className="w-10 h-10 rounded-full bg-[#0A2240] flex items-center justify-center">
             <span className="text-sm font-medium text-white">{initials}</span>
           </div>
         </div>

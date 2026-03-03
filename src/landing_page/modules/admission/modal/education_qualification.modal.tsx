@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useAdmissionContext } from "../context/AdmissionContext";

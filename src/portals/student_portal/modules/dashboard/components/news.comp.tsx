@@ -1,43 +1,43 @@
 import { useState } from "react";
-import { Bell, BookOpen, Megaphone, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Bell, BookOpen, Megaphone, X, Eye } from "lucide-react";
+import { useGetNewsQuery, type NewsItem } from "../api/dashboard.api";
+import type { RootState } from "../../../../../redux/store";
 
 export default function NewsUpdatesComponent() {
   const [showReminder, setShowReminder] = useState(true);
 
-  const newsItems = [
-    {
-      id: 1,
-      title: "Spring 2025 Registration Now Open",
-      excerpt:
-        "Complete your course registration before the deadline to secure your spot in all classes.",
-      date: "December 1, 2025",
-      tag: "Academics",
-      tagColor: "bg-[#0B25452E] text-[#0B2545",
-      icon: BookOpen,
-      iconBg: "bg-[#0B2545]",
-    },
-    {
-      id: 2,
-      title: "Special Chapel Service this Friday",
-      excerpt:
-        "Join us for a special chapel service with guest speaker Rev. Dr. Sarah Johnson at 10:00 AM.",
-      date: "December 15, 2025",
-      tag: "Events",
-      tagColor: "bg-[#D4A34A2E] text-[#D4A34A]",
-      icon: Megaphone,
-      iconBg: "bg-[#D4A34A]",
-    },
-  ];
+  const { data, isLoading, isError } = useGetNewsQuery();
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const newsItems = data?.data || [];
+  const [selectedItem, setSelectedItem] = useState<NewsItem | null>(null);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
-      <div className="">
+      <div>
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">
-            Welcome back, John Doe
+            Welcome back, {user?.name || "Student"}
           </h1>
-          <p className="text-gray-600">Wednesday, December 3, 2025</p>
+          <p className="text-gray-600">
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </p>
         </div>
 
         {/* Important Reminder Banner */}
@@ -60,11 +60,7 @@ export default function NewsUpdatesComponent() {
                   Important Reminder
                 </h3>
                 <p className="text-gray-700 text-sm">
-                  <span className="font-semibold">
-                    Late Registration Deadline:
-                  </span>{" "}
-                  January 15, 2025. Complete your course registration to avoid
-                  additional fees.
+                  Late Registration Deadline: January 15, 2025.
                 </p>
               </div>
             </div>
@@ -77,24 +73,33 @@ export default function NewsUpdatesComponent() {
             <h2 className="text-xl font-semibold text-gray-900">
               News & Updates
             </h2>
-            <button className="text-[#0B2545] text-sm font-medium">
-              View all
-            </button>
           </div>
 
+          {isLoading && (
+            <p className="text-gray-500 text-sm">Loading news...</p>
+          )}
+
+          {isError && (
+            <p className="text-red-500 text-sm">
+              Failed to load news. Please try again.
+            </p>
+          )}
+
           <div className="space-y-4">
-            {newsItems.map((item) => (
+            {newsItems.map((item, index) => (
               <div
-                key={item.id}
+                key={index}
                 className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
               >
                 <div className="flex gap-4">
                   {/* Icon */}
                   <div className="shrink-0">
-                    <div
-                      className={`w-14 h-14 ${item.iconBg} rounded-xl flex items-center justify-center`}
-                    >
-                      <item.icon className="w-7 h-7 text-white" />
+                    <div className="w-14 h-14 bg-[#0B2545] rounded-xl flex items-center justify-center">
+                      {item.category === "student" ? (
+                        <BookOpen className="w-7 h-7 text-white" />
+                      ) : (
+                        <Megaphone className="w-7 h-7 text-white" />
+                      )}
                     </div>
                   </div>
 
@@ -104,22 +109,80 @@ export default function NewsUpdatesComponent() {
                       <h3 className="font-semibold text-gray-900 text-base">
                         {item.title}
                       </h3>
-                      <span
-                        className={`${item.tagColor} px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap`}
-                      >
-                        {item.tag}
-                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <span className="bg-[#0B25452E] text-[#0B2545] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                          {item.category}
+                        </span>
+
+                        <button
+                          onClick={() => setSelectedItem(item)}
+                          aria-label="View announcement"
+                          title="View"
+                          className="p-2 rounded-md text-[#0B2545] bg-[#0B25452E] hover:bg-[#0B2545] hover:text-white transition-colors"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
+
                     <p className="text-gray-600 text-sm mb-3 leading-relaxed">
-                      {item.excerpt}
+                      {item.summary}
                     </p>
-                    <p className="text-gray-500 text-sm">{item.date}</p>
+
+                    <p className="text-gray-500 text-sm">
+                      {formatDate(item.createdAt)}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {newsItems.length === 0 && !isLoading && (
+            <p className="text-gray-500 text-sm">No announcements available.</p>
+          )}
         </div>
+        {/* Modal: View Announcement */}
+        {selectedItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setSelectedItem(null)}
+            />
+
+            <div className="relative z-10 w-full max-w-2xl mx-4 bg-white rounded-2xl p-6 shadow-lg">
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {selectedItem.title}
+              </h3>
+
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-gray-500">
+                  {selectedItem.category}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {formatDate(selectedItem.createdAt)}
+                </span>
+              </div>
+
+              <p className="text-gray-700 mb-4">{selectedItem.summary}</p>
+
+              {selectedItem.body && (
+                <div className="text-gray-600 text-sm leading-relaxed">
+                  {selectedItem.body}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

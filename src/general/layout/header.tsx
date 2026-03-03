@@ -1,31 +1,20 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { navLinks } from "../../lib/nav_links";
-import { ChevronDown, Menu, SearchIcon, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { useSearch } from "../context/SearchContext";
+import type { RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const {
-    searchQuery,
-    setSearchQuery,
-  } = useSearch();
-
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const authState = useSelector((state: RootState) => state.auth);
+  const user = authState.user;
 
   const toggleMobile = () => setMobileOpen(!mobileOpen);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    if (value && pathname !== "/academic") {
-      navigate("/academic");
-    }
-  };
-
-  // Handle routes with hash scrolling logic
   const handleScrollNavigation = (path: string) => {
     const [route, hash] = path.split("#");
 
@@ -138,13 +127,13 @@ const Header = () => {
         </nav>
 
         {/* DESKTOP ACTION BUTTONS */}
-        <div className="hidden lg:flex">
-          {/* <button
-            onClick={() => handleScrollNavigation("/more#support-the-ministry")}
-            className="px-4 py-2 border border-[#D4A95E] rounded-lg text-[#D4A95E] cursor-pointer"
-          >
-            Donate
-          </button> */}
+        <div className="hidden lg:flex items-center gap-4">
+          {user && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="font-medium">{user.name}</span>
+              <span className="text-xs text-gray-400">({user.role})</span>
+            </div>
+          )}
           <button
             onClick={() =>
               handleScrollNavigation("/admission#online-application")
@@ -157,7 +146,7 @@ const Header = () => {
       </div>
 
       {/* ======================================
-                MOBILE MENU
+                  MOBILE MENU
       ======================================= */}
       <div
         className={`lg:hidden fixed top-0 left-0 h-full w-[75%] md:w-[50%] bg-white shadow-lg z-40 transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -230,15 +219,6 @@ const Header = () => {
           })}
 
           {/* MOBILE BUTTONS */}
-          {/* <button
-            onClick={() => {
-              handleScrollNavigation("/more#support-the-ministry");
-              setMobileOpen(false);
-            }}
-            className="w-full px-4 py-2 border border-[#D4A95E] rounded-lg text-[#D4A95E] cursor-pointer"
-          >
-            Donate
-          </button> */}
           <button
             onClick={() => {
               handleScrollNavigation("/admission#online-application");
@@ -248,25 +228,6 @@ const Header = () => {
           >
             Apply
           </button>
-        </div>
-      </div>
-
-      {/* SEARCH BAR UNDER HEADER */}
-      <div className="w-full bg-white shadow-sm border-t border-gray-200 font-inter py-3 overflow-visible">
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl px-5">
-          {/* Search Input */}
-          <div className="flex-1 w-full relative">
-            <div className="flex items-center w-full rounded-lg border border-gray-300 py-2.5 px-4 focus-within:ring-2 focus-within:ring-[#D4A95E] focus-within:border-transparent">
-              <SearchIcon className="w-5 h-5 text-[#D4A95E] shrink-0" />
-              <input
-                type="text"
-                placeholder="Search courses, programs, departments..."
-                className="w-full outline-none indent-2 text-sm"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </header>

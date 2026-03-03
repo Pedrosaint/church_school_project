@@ -1,4 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useContext, useState } from "react";
+import { getSecureItem, setSecureItem, removeSecureItem } from "../../../../utils/secureStorage";
 
 interface AdmissionContextType {
   formData: Record<string, any>;
@@ -18,9 +21,9 @@ export const AdmissionProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const loadSaved = () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = getSecureItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw);
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
         return {
           programmeInfo: parsed.programmeInfo ?? {},
           personalInfo: parsed.personalInfo ?? {},
@@ -53,7 +56,7 @@ export const AdmissionProvider: React.FC<{ children: React.ReactNode }> = ({
         [step]: data,
       };
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        setSecureItem(STORAGE_KEY, JSON.stringify(next));
       } catch {
         // ignore
       }
@@ -73,7 +76,7 @@ export const AdmissionProvider: React.FC<{ children: React.ReactNode }> = ({
       financialReference: {},
     });
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      removeSecureItem(STORAGE_KEY);
     } catch {
       // ignore
     }
@@ -82,7 +85,7 @@ export const AdmissionProvider: React.FC<{ children: React.ReactNode }> = ({
   // persist when entire formData changes (fallback for any direct set)
   React.useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+      setSecureItem(STORAGE_KEY, JSON.stringify(formData));
     } catch {
       // ignore
     }

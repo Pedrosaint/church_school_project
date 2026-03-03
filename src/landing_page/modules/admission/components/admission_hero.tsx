@@ -30,7 +30,7 @@ const AdmissionHero = () => {
   };
 
   return (
-    <section className="bg-[#0B2545] mt-25 md:mt-9 lg:mt-35 py-15 px-6 relative overflow-hidden">
+    <section className="bg-[#0B2545] mt-19 md:mt-5 lg:mt-19 py-15 px-6 relative overflow-hidden">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -55,9 +55,12 @@ const AdmissionHero = () => {
             </p>
 
             {/* CTA Button */}
-            <button 
-            onClick={() => handleScrollNavigation("/admission#online-application")}
-            className="group flex items-center gap-2 bg-[#D4A34A] border border-[#D4A34A] text-gray-900 p-2 rounded-xl font-bold text-lg transition-all transform hover:scale-105 cursor-pointer">
+            <button
+              onClick={() =>
+                handleScrollNavigation("/admission#online-application")
+              }
+              className="group flex items-center gap-2 bg-[#D4A34A] border border-[#D4A34A] text-gray-900 p-2 rounded-xl font-bold text-lg transition-all transform hover:scale-105 cursor-pointer"
+            >
               <span>Start Application</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
