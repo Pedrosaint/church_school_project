@@ -5,13 +5,16 @@ import type { RootState } from "../../redux/store";
 
 interface HeaderProps {
   setMobileOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  role?: string;
+  user?: any;
 }
 
-const Header: React.FC<HeaderProps> = ({ setMobileOpen }) => {
-  const user = useSelector((state: RootState) => state.auth.user);
+const Header: React.FC<HeaderProps> = ({ setMobileOpen, role: propRole, user: propUser }) => {
+  const storeUser = useSelector((state: RootState) => state.auth.user);
+  const user = propUser ?? storeUser;
 
   const displayName = user?.name ?? "Guest";
-  const role = user?.role ?? "";
+  const role = propRole ?? user?.role ?? "";
 
   // 🔥 Generate initials from name
   let initials = "GU";

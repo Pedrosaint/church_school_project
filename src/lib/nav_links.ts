@@ -35,11 +35,9 @@ export const navLinks = [
   //   dropdown: [{ name: "News & Updates", path: "/news-updates" }],
   // },
   {
-    name: "Portal",
-    dropdown: [
-      { name: "Student Portal Login", path: "/student/portal/login" },
-      { name: "Admin Portal Login", path: "/admin/portal" },
-    ],
+    name: "Student Login",
+    path: "https://portal.waths.com.ng/",
+    // { name: "Admin Portal Login", path: "/admin/portal" },
   },
 
   // This is the only part thats different from the other dropdowns

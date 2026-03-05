@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { LogOut, X } from "lucide-react";

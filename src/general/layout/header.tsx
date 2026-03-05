@@ -2,18 +2,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { navLinks } from "../../lib/nav_links";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
-import type { RootState } from "../../redux/store";
-import { useSelector } from "react-redux";
+
 
 const Header = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const authState = useSelector((state: RootState) => state.auth);
-  const user = authState.user;
 
   const toggleMobile = () => setMobileOpen(!mobileOpen);
+
+  const isExternal = (path?: string) => {
+    if (!path) return false;
+    return /^(https?:)?\/\//.test(path) || path.startsWith("mailto:");
+  };
 
   const handleScrollNavigation = (path: string) => {
     const [route, hash] = path.split("#");
@@ -102,7 +104,17 @@ const Header = () => {
                       <span
                         key={item.name}
                         className="block py-1 cursor-pointer"
-                        onClick={() => handleScrollNavigation(item.path)}
+                        onClick={() => {
+                          if (isExternal(item.path)) {
+                            window.open(
+                              item.path,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                            return;
+                          }
+                          handleScrollNavigation(item.path);
+                        }}
                       >
                         {item.name}
                       </span>
@@ -116,9 +128,14 @@ const Header = () => {
             return (
               <span
                 key={link.name}
-                className={`cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""
-                  }`}
-                onClick={() => handleScrollNavigation(link.path)}
+                className={`cursor-pointer ${getActiveClass(link) ? "text-[#D4A95E] font-semibold" : ""}`}
+                onClick={() => {
+                  if (isExternal(link.path)) {
+                    window.open(link.path, "_blank", "noopener,noreferrer");
+                    return;
+                  }
+                  handleScrollNavigation(link.path);
+                }}
               >
                 {link.name}
               </span>
@@ -128,12 +145,6 @@ const Header = () => {
 
         {/* DESKTOP ACTION BUTTONS */}
         <div className="hidden lg:flex items-center gap-4">
-          {user && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="font-medium">{user.name}</span>
-              <span className="text-xs text-gray-400">({user.role})</span>
-            </div>
-          )}
           <button
             onClick={() =>
               handleScrollNavigation("/admission#online-application")
@@ -190,6 +201,15 @@ const Header = () => {
                           key={item.name}
                           className="block py-1 cursor-pointer"
                           onClick={() => {
+                            if (isExternal(item.path)) {
+                              window.open(
+                                item.path,
+                                "_blank",
+                                "noopener,noreferrer",
+                              );
+                              setMobileOpen(false);
+                              return;
+                            }
                             handleScrollNavigation(item.path);
                             setMobileOpen(false);
                           }}
@@ -209,6 +229,11 @@ const Header = () => {
                 key={link.name}
                 className="block py-2 cursor-pointer"
                 onClick={() => {
+                  if (isExternal(link.path)) {
+                    window.open(link.path, "_blank", "noopener,noreferrer");
+                    setMobileOpen(false);
+                    return;
+                  }
                   handleScrollNavigation(link.path);
                   setMobileOpen(false);
                 }}
