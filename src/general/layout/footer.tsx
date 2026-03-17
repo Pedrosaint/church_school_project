@@ -2,11 +2,9 @@ import {
   Mail,
   Phone,
   MapPin,
-  Instagram,
-  Twitter,
   Dot,
-  Youtube,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -49,10 +47,10 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-xl mb-3">About</h3>
           <ul className="space-y-2 text-sm text-gray-400 font-inter">
-            <li>Our Story</li>
-            <li>Mission & Vision</li>
-            <li>Leadership</li>
-            <li>Accreditation</li>
+            <li><Link to="/about#our-story" className="hover:text-white transition-colors">Our Story</Link></li>
+            <li><Link to="/about#what-drives-us" className="hover:text-white transition-colors">Mission & Vision</Link></li>
+            <li><Link to="/about#leadership" className="hover:text-white transition-colors">Leadership</Link></li>
+            <li><Link to="/about#accreditation" className="hover:text-white transition-colors">Accreditation</Link></li>
           </ul>
         </div>
 
@@ -60,10 +58,10 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-xl mb-3">Academics</h3>
           <ul className="space-y-2 text-sm text-gray-400 font-inter">
-            <li>Programs</li>
-            <li>Faculty</li>
-            <li>Library</li>
-            <li>Academic Calendar</li>
+            <li><Link to="/academic" className="hover:text-white transition-colors">Programs</Link></li>
+            <li><Link to="/academic" className="hover:text-white transition-colors">Faculty</Link></li>
+            <li><Link to="/academic" className="hover:text-white transition-colors">Library</Link></li>
+            <li><Link to="/academic" className="hover:text-white transition-colors">Academic Calendar</Link></li>
           </ul>
         </div>
 
@@ -71,10 +69,10 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-xl mb-3">Admission</h3>
           <ul className="space-y-2 text-sm text-gray-400 font-inter">
-            <li>Apply Now</li>
-            <li>Tuition & Aid</li>
-            <li>Visit Campus</li>
-            <li>International Students</li>
+            <li><Link to="/admission#online-application" className="hover:text-white transition-colors">Apply Now</Link></li>
+            <li><Link to="/admission" className="hover:text-white transition-colors">Tuition & Aid</Link></li>
+            <li><Link to="/admission" className="hover:text-white transition-colors">Visit Campus</Link></li>
+            <li><Link to="/admission" className="hover:text-white transition-colors">International Students</Link></li>
           </ul>
         </div>
 
@@ -82,48 +80,24 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-xl mb-3">Resources</h3>
           <ul className="space-y-2 text-sm text-gray-400 font-inter">
-            <li>Student Portal</li>
-            <li>Alumni</li>
-            <li>Events</li>
-            <li>News & Media</li>
+            <li><a href="https://portal.waths.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Student Portal</a></li>
+            <li><Link to="/" className="hover:text-white transition-colors">Alumni</Link></li>
+            <li><Link to="/" className="hover:text-white transition-colors">Events</Link></li>
+            <li><Link to="/news-updates" className="hover:text-white transition-colors">News & Media</Link></li>
           </ul>
         </div>
       </div>
 
-      {/* Newsletter */}
-      <div className="container mx-auto px-6 mt-10 border-t border-gray-600 pt-6">
-        <h3 className="font-semibold text-xl">Stay Connected</h3>
-        <p className="text-sm mb-3 text-gray-400 font-inter">
-          Subscribe to our newsletter for updates and ministry resources
-        </p>
-
-        <div className="flex items-center gap-3 font-inter">
-          <input
-            type="email"
-            className="w-full md:w-96 px-4 py-2 rounded-lg bg-transparent border border-gray-500 text-white"
-            placeholder="Your email address"
-          />
-          <button className="px-6 py-2 bg-[#D4A95E] text-white rounded-lg font-inter">
-            Subscribe
-          </button>
-        </div>
-
-        {/* Social Icons */}
-        <div className="flex gap-4 mt-6">
-          <Twitter className="bg-white/20 p-2 rounded-full" size={40} />
-          <Instagram className="bg-white/20 p-2 rounded-full" size={40} />
-          <Youtube className="bg-white/20 p-2 rounded-full" size={40} />
-        </div>
-      </div>
+      <div className="container mx-auto px-6 mt-10 border-t border-gray-600 pt-6" />
 
       {/* Bottom */}
       <div className="container mx-auto px-6 mt-10 text-sm text-gray-400 flex flex-wrap justify-between font-inter">
         <p>{new Date().getFullYear()} Bible School. All Rights Reserved</p>
 
         <div className="flex space-x-2">
-          <p>Privacy Policy</p> <Dot />
-          <p>Terms of Use</p> <Dot />
-          <p>Accessibility</p>
+          <Link to="/" className="hover:text-white transition-colors">Privacy Policy</Link> <Dot />
+          <Link to="/" className="hover:text-white transition-colors">Terms of Use</Link> <Dot />
+          <Link to="/" className="hover:text-white transition-colors">Accessibility</Link>
         </div>
       </div>
     </footer>
